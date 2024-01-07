@@ -10,5 +10,11 @@ node_modules/
 jspm_packages/
 package-lock.json
 
+
+# Dependency directories
+frontend/node_modules/
+frontend/jspm_packages/
+frontend/package-lock.json
+
 wallet
 !wallet/.gitkeep
