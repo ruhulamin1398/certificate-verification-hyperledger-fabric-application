@@ -1,10 +1,6 @@
 const express = require("express");
 const router = express.Router();
-//blockchain 
-
-
-'use strict';
-
+const asyncHandler = require("express-async-handler");
 
 const { Gateway, Wallets } = require('fabric-network');
 const FabricCAServices = require('fabric-ca-client');
@@ -20,307 +16,165 @@ const walletPath = path.join(__dirname, 'wallet');
 const org1UserId = 'javascriptAppUser';
 
 function prettyJSONString(inputString) {
-	return JSON.stringify(JSON.parse(inputString), null, 2);
+    return JSON.stringify(JSON.parse(inputString), null, 2);
+}
+
+
+async function SubmitTX(transactionName, data) {
+    try {
+        const ccp = buildCCPOrg1();
+        const caClient = buildCAClient(FabricCAServices, ccp, 'ca.org1.example.com');
+        const wallet = await buildWallet(Wallets, walletPath);
+
+        await enrollAdmin(caClient, wallet, mspOrg1);
+        await registerAndEnrollUser(caClient, wallet, mspOrg1, org1UserId, 'org1.department1');
+
+        const gateway = new Gateway(); 
+
+
+        try {
+            await gateway.connect(ccp, {
+                wallet,
+                identity: org1UserId,
+                discovery: { enabled: true, asLocalhost: true }
+            });
+
+            const network = await gateway.getNetwork(channelName);
+            const contract = network.getContract(chaincodeName); 
+            let result =" ";
+            try {
+                let result = await contract.submitTransaction(transactionName, JSON.stringify(data));
+                console.log('Transaction submitted successfully. Result:', result.toString());
+            } catch (error) {
+                result = error.message;
+                console.error('Error submitting transaction:', error.message);
+            }
+
+            
+
+
+            result = Buffer.from(result, 'hex').toString('utf-8')
+
+            console.log(result);
+            return result;
+
+
+        } finally {
+            gateway.disconnect();
+        }
+    } catch (error) {
+        console.error(`Failed to get instantiated chaincodes: ${error}`);
+    }
 }
 
 
 
 
-
-
-
-
-
-
-
-
-
-async function cllBc() {
-	
-	try {
-			const ccp = buildCCPOrg1();
-
-		const caClient = buildCAClient(FabricCAServices, ccp, 'ca.org1.example.com');
-	const wallet = await buildWallet(Wallets, walletPath);
-
-		await enrollAdmin(caClient, wallet, mspOrg1);
-
-		await registerAndEnrollUser(caClient, wallet, mspOrg1, org1UserId, 'org1.department1');
-
-		const gateway = new Gateway();
-
-		try {
-			await gateway.connect(ccp, {
-				wallet,
-				identity: org1UserId,
-				discovery: { enabled: true, asLocalhost: true } // using asLocalhost as this gateway is using a fabric network deployed locally
-			});
-			const network = await gateway.getNetwork(channelName);
-
-		const contract = network.getContract(chaincodeName);
-
-	     
-		console.log('\n--> Evaluate Transaction: GetAllAssets, function returns all the current assets on the ledger');
-			let result = await contract.evaluateTransaction('GetAllAssets');
-			// console.log(`${prettyJSONString(result.toString())}`)
-			return {
-				 data: `${(result.toString())}`
-			};
-			console.log('......................22222222222222222222222222222222222222222')
-     
-
-
-
-		} finally {
-			gateway.disconnect();
-		}
-	} catch (error) {
-		console.error(`******** FAILED to run the application: ${error}`);
-		process.exit(1);
-	}
-}
-
-
-
-
-
-
-async function CreateNewAssetBC(reqAsset){
-  try {
-    const ccp = buildCCPOrg1();
-
-  const caClient = buildCAClient(FabricCAServices, ccp, 'ca.org1.example.com');
-const wallet = await buildWallet(Wallets, walletPath);
-
-  await enrollAdmin(caClient, wallet, mspOrg1);
-
-  await registerAndEnrollUser(caClient, wallet, mspOrg1, org1UserId, 'org1.department1');
-
-  const gateway = new Gateway();
-
-  try {
-    await gateway.connect(ccp, {
-      wallet,
-      identity: org1UserId,
-      discovery: { enabled: true, asLocalhost: true } // using asLocalhost as this gateway is using a fabric network deployed locally
-    });
-    const network = await gateway.getNetwork(channelName);
-
-  const contract = network.getContract(chaincodeName);
-
-   	console.log('\n--> Submit Transaction: CreateAsset, creates new asset with ID, color, owner, size, and appraisedValue arguments');
-			result = await contract.submitTransaction('CreateAsset', reqAsset.ID, reqAsset.Color, reqAsset.Size, reqAsset.Owner, reqAsset.Value);
-			console.log('*** Result: committed');
-			if (`${result}` !== '') {
-        return {
-          data: `${(result.toString())}`
-       };
-			}
-
-  } finally {
-    gateway.disconnect();
-  }
-} catch (error) {
-  console.error(`******** FAILED to run the application: ${error}`);
-  process.exit(1);
-}
-
-
-}
-
-
-
-
-async function GetAssetDetails(AssetID){
-  try {
-    const ccp = buildCCPOrg1();
-
-  const caClient = buildCAClient(FabricCAServices, ccp, 'ca.org1.example.com');
-const wallet = await buildWallet(Wallets, walletPath);
-
-  await enrollAdmin(caClient, wallet, mspOrg1);
-
-  await registerAndEnrollUser(caClient, wallet, mspOrg1, org1UserId, 'org1.department1');
-
-  const gateway = new Gateway();
-
-  try {
-    await gateway.connect(ccp, {
-      wallet,
-      identity: org1UserId,
-      discovery: { enabled: true, asLocalhost: true } // using asLocalhost as this gateway is using a fabric network deployed locally
-    });
-    const network = await gateway.getNetwork(channelName);
-
-  const contract = network.getContract(chaincodeName);
-
-
-  console.log('\n--> Evaluate Transaction: ReadAsset, function returns ' + AssetID+ '  attributes');
-  result = await contract.evaluateTransaction('ReadAsset', AssetID);
-  
-  return {
-    data: `${(result.toString())}`
- };
-
-
-
-
-
-
-
-  } finally {
-    gateway.disconnect();
-  }
-} catch (error) {
-  console.error(`******** FAILED to run the application: ${error}`);
-  process.exit(1);
-}
-
-
-}
-
-
-
-
-
-
-
-
-
-
-
-async function UpdateAssetBC(AssetDetails){
-  try {
-    const ccp = buildCCPOrg1();
-
-  const caClient = buildCAClient(FabricCAServices, ccp, 'ca.org1.example.com');
-const wallet = await buildWallet(Wallets, walletPath);
-
-  await enrollAdmin(caClient, wallet, mspOrg1);
-
-  await registerAndEnrollUser(caClient, wallet, mspOrg1, org1UserId, 'org1.department1');
-
-  const gateway = new Gateway();
-
-  try {
-    await gateway.connect(ccp, {
-      wallet,
-      identity: org1UserId,
-      discovery: { enabled: true, asLocalhost: true } // using asLocalhost as this gateway is using a fabric network deployed locally
-    });
-    const network = await gateway.getNetwork(channelName);
-
-  const contract = network.getContract(chaincodeName);
-
+// CREATE Certificate
+
+//@desc Create new certificate
+//@route POST /create-certificate
+//@access pubic
  
 
-      try {
-				// How about we try a transactions where the executing chaincode throws an error
-				// Notice how the submitTransaction will throw an error containing the error thrown by the chaincode
-        console.log('\n--> Submit Transaction: UpdateAsset, UpdateAsset asset with ID, color, owner, size, and appraisedValue arguments');
-        result = await contract.submitTransaction('UpdateAsset', AssetDetails.ID, AssetDetails.Color, AssetDetails.Size, AssetDetails.Owner, AssetDetails.Value);
-          console.log('******** FAILED to return an error');
-			} catch (error) {
-				console.log(`*** Successfully caught the error: \n    ${error}`);
-			}
 
+router.post("/create-certificate", asyncHandler(async (req, res) => {
+    const data = {
+        studentID,studentName,providerID,providerName,course,issueDate} = req.body;
 
-
-
-
-
-			if (`${result}` !== '') {
-        return {
-          data: `${(result.toString())}`
-       };
-			}
-
-  } finally {
-    gateway.disconnect();
-  }
-} catch (error) {
-  console.error(`******** FAILED to run the application: ${error}`);
-  process.exit(1);
-}
-
-
-}
-
+    const result = await SubmitTX("CreateCertificate", data)
+     res.json({ result  });
+}));
 
 
  
 
-// CREATE Asset
-router.route("/create-asset").post(async (req, res, next) => {
+// GET SHARE Certificate
+router.get("/share-certificate/:studentID", asyncHandler(async (req, res) => {
+    const data = {studentID}=req.params;
+    const result = await SubmitTX("ShareCertificate", data)
+     res.json({ result  });
+}));
 
-  CreateNewAssetBC(req.body)
- console.log(req.body)
+
+
+// VERIFY Certificate
+router.route("/verify-certificate/:verifierID/:studentID").put(async (req, res, next) => {
+    const result = await callBlockchain('VerifyCertificate', req.params.verifierID, req.params.studentID);
+    res.json(result);
 });
 
-// READ Assets
-router.route("/").get(async (req, res, next) => {
-  console.log('all called.......................................................................')
+// GET All Certificates
+// router.route("/get-all-certificates").get(async (req, res, next) => {
+//     const data = {
+//         studentID,studentName,providerID,providerName,course,issueDate} = req.body;
 
+//     const result = await SubmitTX("CreateCertificate", data)
+//      res.json({ result  });
+// });
 
- 
-const newdata = await cllBc()
-res.json(newdata)
- 
-  console.log(' ENDEEEEEEEEED     all called..........................................' )
-  
- 
-});
-
-
-
-
-
+// GET Single Certificate
+router.get("/get-certificate/:studentID", asyncHandler(async (req, res) => {
+    const data = {studentID}=req.params;
+    const result = await SubmitTX("ReadCertificate", data)
+     res.json({ result  });
+}));
 
 
 
-
-// Get Single Asset
-router.route("/edit-asset/:id").get(async (req, res, next) => {
-  console.log(req.params.id);
-  
-  const newdata = await GetAssetDetails(req.params.id);
-  console.log(newdata);
-res.json(newdata);
-
- 
-});
-
-// Update Asset
-router.route("/update-Asset/:id").put( async (req, res, next) => {
-  console.log(req.body)
-  await UpdateAssetBC(req.body);
-      res.status(200).json({
-        msg: 'Successfylly added ',
-      });
-
- 
-});
-
-// Delete Asset
-router.route("/delete-Asset/:id").delete(async (req, res, next) => {
-  console.log(req.params.id)
-
-  await DeleteAssetBC(req.params.id);
-  res.status(200).json({
-    msg: 'Successfully Deleted ',
-  });
-
-
-
-  // AssetSchema.findByIdAndRemove(req.params.id, (error, data) => {
-  //   if (error) {
-  //     return next(error);
-  //   } else {
-  //     res.status(200).json({
-  //       msg: data,
-  //     });
-  //   }
-  // });
-});
 
 module.exports = router;
+
+
+async function callBlockchain(transactionName, ...args) {
+    return args;
+
+    try {
+        const ccp = buildCCPOrg1();
+        const caClient = buildCAClient(FabricCAServices, ccp, 'ca.org1.example.com');
+        const wallet = await buildWallet(Wallets, walletPath);
+
+        await enrollAdmin(caClient, wallet, mspOrg1);
+        await registerAndEnrollUser(caClient, wallet, mspOrg1, org1UserId, 'org1.department1');
+
+        const gateway = new Gateway();
+
+        try {
+            await gateway.connect(ccp, {
+                wallet,
+                identity: org1UserId,
+                discovery: { enabled: true, asLocalhost: true }
+            });
+            const network = await gateway.getNetwork(channelName);
+            const contract = network.getContract(chaincodeName);
+            const channel = network.getChannel();
+            // return channel;
+
+            // return transactionName;
+
+            console.log(`\n--> Evaluate/Submit Transaction: ${transactionName}`);
+            // const result = await contract[transactionName](...args);
+            const result = await contract["CreateCertificate"](...args);
+
+
+
+            if (transactionName.startsWith('Get') || transactionName.startsWith('Read')) {
+                return {
+                    data: `${prettyJSONString(result.toString())}`
+                };
+            } else {
+                console.log('*** Result: committed');
+                return {
+                    data: `${prettyJSONString(result.toString())}`
+                };
+            }
+        } finally {
+            gateway.disconnect();
+        }
+    } catch (error) {
+        console.error(`******** FAILED to run the application: ${error}`);
+        return {
+            error: `Failed to run the application: ${error}`
+        };
+    }
+}

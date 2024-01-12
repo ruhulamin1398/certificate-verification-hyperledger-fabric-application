@@ -1,4 +1,5 @@
 let express = require("express");
+const listEndpoints = require('express-list-endpoints');
 let mongoose = require("mongoose");
 let cors = require("cors");
 let bodyParser = require("body-parser");
@@ -14,7 +15,7 @@ app.use(
   })
 );
 app.use(cors());
-app.use("/Assets", AssetRoute);
+app.use("/", AssetRoute);
 
 // PORT
 const port = process.env.PORT || 4000;
@@ -32,3 +33,11 @@ app.use(function (err, req, res, next) {
   if (!err.statusCode) err.statusCode = 500;
   res.status(err.statusCode).send(err.message);
 });
+
+
+
+const allEndpoints = listEndpoints(app);
+console.log(allEndpoints);
+
+
+

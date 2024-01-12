@@ -1,30 +1,42 @@
-/*
- * Copyright IBM Corp. All Rights Reserved.
- *
- * SPDX-License-Identifier: Apache-2.0
- */
-
 'use strict';
 
-// Deterministic JSON.stringify()
-const stringify  = require('json-stringify-deterministic');
-const sortKeysRecursive  = require('sort-keys-recursive');
+
+// The CreateCertificate function allows a certificate provider to create a new certificate for a student.
+
+// The ShareCertificate function allows a student to mark their certificate as shared.
+
+// The VerifyCertificate function allows the certificate provider to verify a certificate. Only the certificate provider is authorized to perform this action.
+
+// The ReadCertificate and CertificateExists functions are utility functions to read a certificate and check if it exists
+
+
+
+
 const { Contract } = require('fabric-contract-api');
 
-class AssetTransfer extends Contract {
+class CertificateContract extends Contract {
 
-  
     async InitLedger(ctx) {
         // This function can be used to initialize the ledger with any default data if needed.
     }
 
-    async CreateCertificate(ctx, studentID, studentName, providerID, providerName, course, issueDate) {
+    async CreateCertificate(ctx, data) {
+        const inputData = JSON.parse(data);
+        const {
+            studentID,
+            studentName,
+            providerID,
+            providerName,
+            course,
+            issueDate,
+        } = inputData;
+    
         // Check if the certificate already exists
         const exists = await this.CertificateExists(ctx, studentID);
         if (exists) {
             throw new Error(`Certificate for student ${studentID} already exists`);
         }
-
+    
         // Create a new certificate object
         const certificate = {
             StudentID: studentID,
@@ -36,15 +48,18 @@ class AssetTransfer extends Contract {
             Shared: false,
             Verified: false,
         };
-
+    
         // Store the certificate in the world state
         await ctx.stub.putState(studentID, Buffer.from(JSON.stringify(certificate)));
-
+    
         return JSON.stringify(certificate);
     }
 
-    async ShareCertificate(ctx, studentID) {
-        // Check if the certificate exists
+    async ShareCertificate(ctx, data) {
+
+        const inputData = JSON.parse(data);
+        const studentID = inputData.studentID;
+
         const exists = await this.CertificateExists(ctx, studentID);
         if (!exists) {
             throw new Error(`Certificate for student ${studentID} does not exist`);
@@ -62,7 +77,13 @@ class AssetTransfer extends Contract {
         return JSON.stringify(existingCertificate);
     }
 
-    async VerifyCertificate(ctx, verifierID, studentID) {
+    async VerifyCertificate(ctx, data) {
+
+        const inputData = JSON.parse(data);
+        const studentID = inputData.studentID;
+        const verifierID = inputData.verifierID;
+       
+       
         // Check if the certificate exists
         const exists = await this.CertificateExists(ctx, studentID);
         if (!exists) {
@@ -86,21 +107,36 @@ class AssetTransfer extends Contract {
         return JSON.stringify(existingCertificate);
     }
 
-    async ReadCertificate(ctx, studentID) {
+    async ReadCertificate(ctx, data) {
+        // Parse the incoming data
+        const inputData = JSON.parse(data);
+    
+        // Extract the studentID from the parsed data
+        const studentID = inputData.studentID;
+    
+        // Check if data has the studentID property
         const certificateJSON = await ctx.stub.getState(studentID);
         if (!certificateJSON || certificateJSON.length === 0) {
+            rerun (`Certificate for student ${studentID} does not exist`);
             throw new Error(`Certificate for student ${studentID} does not exist`);
         }
+        
         return JSON.parse(certificateJSON.toString());
     }
+    
+    async CertificateExists(ctx, data) {
 
-    async CertificateExists(ctx, studentID) {
+        const inputData = JSON.parse(data);
+        const studentID = inputData.studentID;
+
         const certificateJSON = await ctx.stub.getState(studentID);
         return certificateJSON && certificateJSON.length > 0;
     }
+
     async Demo(ctx) {
-        return "hi";
+        return "hi hello";
     }
+
 }
 
-module.exports = AssetTransfer;
+module.exports = CertificateContract;
