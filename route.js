@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const asyncHandler = require("express-async-handler");
-
+const bodyParser = require('body-parser');
 const { Gateway, Wallets } = require('fabric-network');
 const FabricCAServices = require('fabric-ca-client');
 const path = require('path');
@@ -21,6 +21,7 @@ function prettyJSONString(inputString) {
 
 
 async function SubmitTX(transactionName, data) {
+    let result;
     try {
         const ccp = buildCCPOrg1();
         const caClient = buildCAClient(FabricCAServices, ccp, 'ca.org1.example.com');
@@ -41,30 +42,33 @@ async function SubmitTX(transactionName, data) {
 
             const network = await gateway.getNetwork(channelName);
             const contract = network.getContract(chaincodeName); 
-            let result =" ";
+
+
+            // return  await contract.evaluateTransaction("Demo");
+
+
+            
             try {
-                let result = await contract.submitTransaction(transactionName, JSON.stringify(data));
+                result = await contract.submitTransaction(transactionName, JSON.stringify(data));
                 console.log('Transaction submitted successfully. Result:', result.toString());
+               
             } catch (error) {
                 result = error.message;
                 console.error('Error submitting transaction:', error.message);
             }
 
             
-
-
-            result = Buffer.from(result, 'hex').toString('utf-8')
-
-            console.log(result);
-            return result;
+ 
 
 
         } finally {
             gateway.disconnect();
+ 
         }
     } catch (error) {
         console.error(`Failed to get instantiated chaincodes: ${error}`);
     }
+    return result.toString();
 }
 
 
@@ -79,19 +83,29 @@ async function SubmitTX(transactionName, data) {
 
 
 router.post("/create-certificate", asyncHandler(async (req, res) => {
-    const data = {
-        studentID,studentName,providerID,providerName,course,issueDate} = req.body;
+    const data = {fileHash, IssueDate, certID,universityName, universityPK,issuingOfficerPK, studentPK,course} = req.body;
 
     const result = await SubmitTX("CreateCertificate", data)
-     res.json({ result  });
+    console.log("res " + result);
+     res.json({ 
+        "msg":"Certificate Created successfully",
+        "certificate":JSON.parse(result) 
+    });
 }));
 
 
  
 
 // GET SHARE Certificate
-router.get("/share-certificate/:studentID", asyncHandler(async (req, res) => {
-    const data = {studentID}=req.params;
+router.get("/share-certificate/", asyncHandler(async (req, res) => {
+    const certID = {certID}=req.body;
+    const sharedWith = {sharedWith}=req.body;
+    const data= {
+        certID,sharedWith
+    }
+    res.json({
+        certID,sharedWith
+    })
     const result = await SubmitTX("ShareCertificate", data)
      res.json({ result  });
 }));
@@ -114,10 +128,14 @@ router.route("/verify-certificate/:verifierID/:studentID").put(async (req, res, 
 // });
 
 // GET Single Certificate
-router.get("/get-certificate/:studentID", asyncHandler(async (req, res) => {
-    const data = {studentID}=req.params;
+router.get("/get-certificate/:certID", asyncHandler(async (req, res) => {
+    const data = {certID}=req.params;
     const result = await SubmitTX("ReadCertificate", data)
-     res.json({ result  });
+    //  res.json({ result  });
+    res.json({ 
+        "msg":"Certificate retrieved successfully",
+        "certificate":JSON.parse(result) 
+    });
 }));
 
 
@@ -126,55 +144,55 @@ router.get("/get-certificate/:studentID", asyncHandler(async (req, res) => {
 module.exports = router;
 
 
-async function callBlockchain(transactionName, ...args) {
-    return args;
+// async function callBlockchain(transactionName, ...args) {
+//     return args;
 
-    try {
-        const ccp = buildCCPOrg1();
-        const caClient = buildCAClient(FabricCAServices, ccp, 'ca.org1.example.com');
-        const wallet = await buildWallet(Wallets, walletPath);
+//     try {
+//         const ccp = buildCCPOrg1();
+//         const caClient = buildCAClient(FabricCAServices, ccp, 'ca.org1.example.com');
+//         const wallet = await buildWallet(Wallets, walletPath);
 
-        await enrollAdmin(caClient, wallet, mspOrg1);
-        await registerAndEnrollUser(caClient, wallet, mspOrg1, org1UserId, 'org1.department1');
+//         await enrollAdmin(caClient, wallet, mspOrg1);
+//         await registerAndEnrollUser(caClient, wallet, mspOrg1, org1UserId, 'org1.department1');
 
-        const gateway = new Gateway();
+//         const gateway = new Gateway();
 
-        try {
-            await gateway.connect(ccp, {
-                wallet,
-                identity: org1UserId,
-                discovery: { enabled: true, asLocalhost: true }
-            });
-            const network = await gateway.getNetwork(channelName);
-            const contract = network.getContract(chaincodeName);
-            const channel = network.getChannel();
-            // return channel;
+//         try {
+//             await gateway.connect(ccp, {
+//                 wallet,
+//                 identity: org1UserId,
+//                 discovery: { enabled: true, asLocalhost: true }
+//             });
+//             const network = await gateway.getNetwork(channelName);
+//             const contract = network.getContract(chaincodeName);
+//             const channel = network.getChannel();
+//             // return channel;
 
-            // return transactionName;
+//             // return transactionName;
 
-            console.log(`\n--> Evaluate/Submit Transaction: ${transactionName}`);
-            // const result = await contract[transactionName](...args);
-            const result = await contract["CreateCertificate"](...args);
+//             console.log(`\n--> Evaluate/Submit Transaction: ${transactionName}`);
+//             // const result = await contract[transactionName](...args);
+//             const result = await contract["CreateCertificate"](...args);
 
 
 
-            if (transactionName.startsWith('Get') || transactionName.startsWith('Read')) {
-                return {
-                    data: `${prettyJSONString(result.toString())}`
-                };
-            } else {
-                console.log('*** Result: committed');
-                return {
-                    data: `${prettyJSONString(result.toString())}`
-                };
-            }
-        } finally {
-            gateway.disconnect();
-        }
-    } catch (error) {
-        console.error(`******** FAILED to run the application: ${error}`);
-        return {
-            error: `Failed to run the application: ${error}`
-        };
-    }
-}
+//             if (transactionName.startsWith('Get') || transactionName.startsWith('Read')) {
+//                 return {
+//                     data: `${prettyJSONString(result.toString())}`
+//                 };
+//             } else {
+//                 console.log('*** Result: committed');
+//                 return {
+//                     data: `${prettyJSONString(result.toString())}`
+//                 };
+//             }
+//         } finally {
+//             gateway.disconnect();
+//         }
+//     } catch (error) {
+//         console.error(`******** FAILED to run the application: ${error}`);
+//         return {
+//             error: `Failed to run the application: ${error}`
+//         };
+//     }
+// }
