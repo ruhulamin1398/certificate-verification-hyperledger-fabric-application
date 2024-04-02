@@ -2,20 +2,18 @@
 
 
 
-#/home/ruhul/Downloads/fabric-samples/asset-transfer-basic/certificate-verification-hyperledger-fabric-application/chaincode-javascript
 
-cd ../../test-network
+
+cd ../test-network
 ./network.sh down
-# ./network.sh up createChannel -c mychannel -ca
-./network.sh up createChannel -c mychannel -ca
 
-# ./network.sh deployCC -ccn basic -ccp ../asset-transfer-basic/certificate-verification-hyperledger-fabric-application/chaincode-javascript/ -ccl javascript
-./network.sh deployCC -ccn basic -ccp ../asset-transfer-basic/certificate-verification-hyperledger-fabric-application/chaincode-javascript/ -ccl javascript
+./network.sh up createChannel -c mychannel -ca -s couchdb
 
-# cd ../asset-transfer-basic/application-javascript/
-cd ../asset-transfer-basic/certificate-verification-hyperledger-fabric-application/
+./network.sh deployCC -ccn basic -ccp ../certificate-verification-hyperledger-fabric-application/chaincode-javascript/ -ccl javascript
 
-# rm -rf wallet/
+cd ../certificate-verification-hyperledger-fabric-application/
+
+
 rm -rf wallet/
 
 npm install
