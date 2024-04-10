@@ -16,18 +16,139 @@ const { Contract } = require('fabric-contract-api');
 
 class CertificateContract extends Contract {
 
-    async InitLedger(ctx) {
-        // This function can be used to initialize the ledger with any default data if needed.
+    constructor() {
+        super();
+        this.flag = 0;
     }
 
-    
+    // Define initLedger function inside the constructor scope to make it effectively private
+    async initLedger(ctx) {
+        // Access flag using this.flag
+        if (this.flag === 0) {
+            const authorityId = await this.getCaller(ctx);
+            
+            const authority = {
+                "type": "authority",
+                "name": "Omar Saad",
+                "addedBy": authorityId,
+                authorityId,
+                "otherInformation": "Contract owner",
+                "status": 1
+            };
 
-  
+            const exists =await this.isExists(ctx, "aut" + authority.authorityId);
+            if (!exists) {
+               
+
+
+        await ctx.stub.putState("aut" + authorityId, Buffer.from(JSON.stringify(authority)));
+
+
+            }
+            this.flag = 1;
+            return authority;
+        }
+        else{
+            throw new Error(`Already inititalized`);
+        }
+    }
+
+
+
+
+    async addAuthorityMember(ctx, data) {
+        const callerID = await this.getCaller(ctx);
+
+        const isAuthorityMember = await this.isAuthority(ctx);
+        if (!isAuthorityMember) {
+            throw new Error("Only authority members ar allowed to perform this function");
+        }
+
+        
+        const inputData = JSON.parse(data);
+        const {
+            name,
+            authorityId,
+            otherInformation
+        } = inputData;
+
+        // Check if the certificate already exists
+        const exists = await this.isExists(ctx, "aut" + authorityId);
+        if (exists) {
+            throw new Error(` ${authorityId} already exists`);
+        }
+
+        const authority = {
+            "type": "authority",
+            name,
+            authorityId,
+            "addedBy": callerID,
+            otherInformation,
+            "status": 1
+        };
+
+
+        await ctx.stub.putState("aut" + authorityId, Buffer.from(JSON.stringify(authority)));
+
+        return JSON.stringify(authority);
+    }
+
+
+
+
+
+
+    async CreateUniversity(ctx, data) {
+
+        const callerID = await this.getCaller(ctx);
+        const isAuthorityMember = await this.isAuthority(ctx);
+        if (!isAuthorityMember) {
+            throw new Error("Only authority members ar allowed to perform this function");
+        }
+
+
+        const inputData = JSON.parse(data);
+        const {
+            universityName,
+            universityId
+        } = inputData;
+
+        const exists = await this.isExists(ctx, "uni" + universityId);
+        if (exists) {
+            throw new Error(` ${universityId} already exists`);
+        }
+
+        const university = {
+            "type": "university",
+
+            "addedBy": callerID,
+            universityName,
+            universityId,
+            "status": 1
+        };
+
+        // Store the certificate in the world state
+        await ctx.stub.putState("uni" + universityId, Buffer.from(JSON.stringify(university)));
+
+        return JSON.stringify(university);
+    }
+
+
 
 
 
 
     async CreateCertificate(ctx, data) {
+
+        const callerID = await this.getCaller(ctx);
+        const isUniversityAdmin = await this.isUniversityAdmin(ctx);
+        if (!isAuthorityMember) {
+            throw new Error("Only authority members ar allowed to perform this function");
+        }
+
+
+
+
         const inputData = JSON.parse(data);
         const {
             fileHash,
@@ -39,14 +160,17 @@ class CertificateContract extends Contract {
             studentPK,
             course
         } = inputData;
-    
+
         // Check if the certificate already exists
-        const exists = await this.CertificateExists(ctx, certID);
+        const exists = await this.isExists(ctx, "cert" + certID);
         if (exists) {
-            throw new Error(`Certificate for student ${certID} already exists`);
+            throw new Error(`Certificate  ${"cert" + certID} already exists`);
         }
-    
+
         const certificate = {
+            "type": "certificate",
+
+            "addedBy": callerID,
             fileHash,
             IssueDate,
             certID,
@@ -55,99 +179,130 @@ class CertificateContract extends Contract {
             issuingOfficerPK,
             studentPK,
             course,
-            shared:[]
+            shared: []
         };
-    
+
         // Store the certificate in the world state
-        await ctx.stub.putState(certID, Buffer.from(JSON.stringify(certificate)));
-    
+        await ctx.stub.putState("cert" + certID, Buffer.from(JSON.stringify(certificate)));
+
         return JSON.stringify(certificate);
     }
 
-    async ShareCertificate(ctx, data) {
-
-        const inputData = JSON.parse(data);
-        const certID = inputData.certID;
-        const sharedWith = inputData.sharedWith;
-
-        const exists = await this.CertificateExists(ctx, certID);
-        if (!exists) {
-            throw new Error(`Certificate for student ${certID} does not exist`);
-        }
-
-        // Get the current certificate
-        const existingCertificate = await this.ReadCertificate(ctx, certID);
-        
-        // Update the certificate to mark it as shared
-        certificate.shared.push(sharedWith);
-
-        // Store the updated certificate in the world state
-        await ctx.stub.putState(certID, Buffer.from(JSON.stringify(existingCertificate)));
-
-        return JSON.stringify(existingCertificate);
-    }
 
 
 
-    // async VerifyCertificate(ctx, data) {
 
-    //     const inputData = JSON.parse(data);
-    //     const certID = inputData.certID;
-    //     const verifierID = inputData.verifierID;
-       
-       
-    //     // Check if the certificate exists
-    //     const exists = await this.CertificateExists(ctx, certID);
-    //     if (!exists) {
-    //         throw new Error(`Certificate for student ${certID} does not exist`);
-    //     }
-
-    //     // Get the current certificate
-    //     const existingCertificate = await this.ReadCertificate(ctx, certID);
-
-    //     // Check if the verifier is authorized
-    //     if (verifierID !== existingCertificate.ProviderID) {
-    //         throw new Error(`Unauthorized verifier. Only the certificate provider can verify the certificate.`);
-    //     }
-
-    //     // Update the certificate to mark it as verified
-    //     existingCertificate.Verified = true;
-
-    //     // Store the updated certificate in the world state
-    //     await ctx.stub.putState(certID, Buffer.from(JSON.stringify(existingCertificate)));
-
-    //     return JSON.stringify(existingCertificate);
-    // }
-
-    async ReadCertificate(ctx, data) {
+    async ReadAsset(ctx, data) {
         // Parse the incoming data
         const inputData = JSON.parse(data);
-    
-        // Extract the certID from the parsed data
-        const certID = inputData.certID;
-    
-        // Check if data has the certID property
-        const certificateJSON = await ctx.stub.getState(certID);
-        if (!certificateJSON || certificateJSON.length === 0) {
-            rerun (`Certificate for student ${certID} does not exist`);
-            throw new Error(`Certificate for student ${certID} does not exist`);
-        }
-        
-        return JSON.parse(certificateJSON.toString());
-    }
-    
-    async CertificateExists(ctx, certID) {
 
-        const certificateJSON = await ctx.stub.getState(certID);
+        const prefix = inputData.prefix;
+        const id = inputData.id;
+
+
+        const exists = await this.isExists(ctx, prefix + id);
+        if (!exists) {
+            throw new Error(` ${id} doen't  exists`);
+        }
+
+        const assetJSON = await ctx.stub.getState(prefix + id);
+
+
+        return JSON.parse(assetJSON.toString());
+    }
+
+
+
+
+
+
+    async GetAllAssets(ctx, data) {
+        const inputData = JSON.parse(data);
+        const type = inputData.type;
+
+        if(type =="authority"){
+            const isAuthorityMember = await this.isAuthority(ctx);
+            if (!isAuthorityMember) {
+                throw new Error("Only authority members ar allowed to perform this function");
+            }
+        }
+        const allResults = [];
+        // range query with empty string for startKey and endKey does an open-ended query of all assets in the chaincode namespace.
+        const iterator = await ctx.stub.getStateByRange('', '');
+        let result = await iterator.next();
+        while (!result.done) {
+            const strValue = Buffer.from(result.value.value.toString()).toString('utf8');
+            let record;
+            try {
+                record = JSON.parse(strValue);
+            } catch (err) {
+                console.log(err);
+                record = strValue;
+            }
+            if (record.type == type) {
+
+                allResults.push(record);
+            }
+            result = await iterator.next();
+        }
+        return JSON.stringify(allResults);
+    }
+
+
+
+
+
+    async isExists(ctx, id) {
+
+        const certificateJSON = await ctx.stub.getState(id);
         return certificateJSON && certificateJSON.length > 0;
     }
 
+    async getCaller(ctx) {
+        const identityString = ctx.clientIdentity.getID();
+        const match = identityString.match(/CN=([^,]+)/);
+        if (match && match[1]) {
+            // Extract the username part
+            const username = match[1].split("::")[0]; // Extracting before "::"
+            return username;
+        } else {
+            throw new Error(`Somthing went wrong to get id `);
+        }
+    }
+    async isAuthority(ctx){
+        const callerID = await this.getCaller(ctx);
+        const exists = await this.isExists(ctx, "aut" + callerID);
+        if (exists) {
+            return 1
+        }
+        else {
+            return 0;
+        }
+
+    }
+
+
+    async isUniversityAdmin(ctx){
+        const callerID = await this.getCaller(ctx);
+        const exists = await this.isExists(ctx, "uni" + callerID);
+        if (exists) {
+            return 1
+        }
+        else {
+            return 0;
+        }
+
+    }
+
+
 
     
 
-    async Demo(ctx) {
-        return "hi hello";
-    }
+
+
+
+
+
 
 }
 
