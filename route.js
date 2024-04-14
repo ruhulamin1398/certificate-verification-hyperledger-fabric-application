@@ -13,7 +13,7 @@ const chaincodeName = process.env.CHAINCODE_NAME || 'basic';
 
 const mspOrg1 = 'Org1MSP';
 const walletPath = path.join(__dirname, 'wallet');
-const org1UserId = 'omar2';
+const org1UserId = 'saif';
 
 function prettyJSONString(inputString) {
     return JSON.stringify(JSON.parse(inputString), null, 2);
@@ -54,8 +54,12 @@ async function SubmitTX(transactionName, data) {
                 console.log('Transaction submitted successfully. Result:', result.toString());
 
             } catch (error) {
-                console.error('Error submitting transaction:', error.message);
-                throw new Error(error.message); // Throw the error message
+                console.error('Error submitting transaction:', error.message.toString());
+
+
+                const errmsg = error.message.toString();
+                return errmsg
+                throw new Error('An error occurred'); // Throw the error message
 
             }
 
@@ -70,8 +74,36 @@ async function SubmitTX(transactionName, data) {
     } catch (error) {
         console.error(`Failed to get instantiated chaincodes: ${error}`);
     }
-    return result.toString();
+    // return result
+    return JSON.parse(result.toString());
 }
+
+
+
+
+
+
+
+router.post("/test", asyncHandler(async (req, res) => {
+    const data ={
+        "prefix": "cert",
+        "id": "111"
+    }
+
+
+ 
+        const result = await SubmitTX("getIssuer", data)
+
+        console.log("testttttttttttttttttttttttttttttttt ")
+        console.log(result)
+
+        console.log("teseeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee ")
+
+        res.json({result})
+ 
+   
+
+}));
 
 
 
@@ -84,22 +116,13 @@ router.post("/init", asyncHandler(async (req, res) => {
 
 
 
-    try {
-         console.log("----------------")
         const result = await SubmitTX("initLedger", data)
         res.json({
-            "msg": "Initialization Successfull",
-            "data":JSON.parse(result)
+            "data":(result)
         });
 
-    } catch (error) {
-
-        console.log("----------------")
-        res.status(500).json({
-            "msg": "Somethings went wrong !!!!!!!!!!!!!"
-        });
-
-    }
+   
+        
 
 }));
 
@@ -117,22 +140,14 @@ router.post("/add-authority", asyncHandler(async (req, res) => {
         otherInformation
     } = req.body;
 
-
-    try {
-         
+ 
         const result = await SubmitTX("addAuthorityMember", data)
         res.json({
-            "msg": "Authority added  successfully",
-            "authority": JSON.parse(result)
+            // "msg": "Authority added  successfully",
+            "output": (result)
         });
 
-    } catch (error) {
-
-        res.status(500).json({
-            "msg": " Something went wrong !!!!!!!!!!!!!"
-        });
-
-    }
+     
 
 }));
 
@@ -143,21 +158,13 @@ router.route("/get-all-authorities").get(async (req, res, next) => {
     }
 
 
-    try {
-         
         const result = await SubmitTX("GetAllAssets",data)
       
         res.json({
-            "authorities": JSON.parse(result)
+            "output":  (result)
         });
 
-    } catch (error) {
-
-        res.status(500).json({
-            "msg": " Something went wrong !!!!!!!!!!!!!"
-        });
-
-    }
+   
 
  
 });
@@ -167,142 +174,21 @@ router.route("/get-all-authorities").get(async (req, res, next) => {
 
 
 
-// CREATE Certificate
+// *! university section 
 
-//@desc Create new certificate
-//@route POST /create-certificate
-//@access pubic
-
-
-
-router.post("/create-certificate", asyncHandler(async (req, res) => {
-    const data = { fileHash, IssueDate, certID, universityName, universityPK, issuingOfficerPK, studentPK, course } = req.body;
-
-
-
-    try {
-         
-        const result = await SubmitTX("CreateCertificate", data)
-        console.log("res " + result);
-        res.json({
-            "msg": "Certificate Created successfully",
-            "certificate": JSON.parse(result)
-        });
-    
-
-    } catch (error) {
-
-        res.status(400).json({
-            "msg": " Certificate already exist !!!!!!!!!!!!!"
-        });
-
-    }
-    
-}));
-
-
-
-
-// GET SHARE Certificate
-router.get("/share-certificate/", asyncHandler(async (req, res) => {
-    const certID = { certID } = req.body;
-    const sharedWith = { sharedWith } = req.body;
-    const data = {
-        certID, sharedWith
-    }
-    res.json({
-        certID, sharedWith
-    })
-    const result = await SubmitTX("ShareCertificate", data)
-    res.json({ result });
-}));
-
-
-
-// VERIFY Certificate
-router.route("/verify-certificate/:verifierID/:studentID").put(async (req, res, next) => {
-    const result = await callBlockchain('VerifyCertificate', req.params.verifierID, req.params.studentID);
-    res.json(result);
-});
-
-// GET All Certificates
-router.route("/get-all-certificates").get(async (req, res, next) => {
-    const data ={
-        "type": "certificate"
-    }
-
-
-    try {
-         
-        const result = await SubmitTX("GetAllAssets",data)
-        res.json({
-            "certificates": JSON.parse(result)
-        });
-
-    } catch (error) {
-
-        res.status(500).json({
-            "msg": " Something went wrong !!!!!!!!!!!!!"
-        });
-
-    }
-
- 
-});
-
-// GET Single Certificate
-router.get("/get-certificate/:id", asyncHandler(async (req, res) => {
-    const id = req.params.id;
-
-    const data = { id, "prefix":"cert" }
-
-
-
-    try {
-         
-        const result = await SubmitTX("ReadAsset", data)
-        //  res.json({ result  });
-        res.json({
-            "msg": "Certificate retrieved successfully",
-            "certificate": JSON.parse(result)
-        });
-    
-
-    } catch (error) {
-
-        res.status(400).json({
-            "msg": " Certificate doesn't exist !!!!!!!!!!!!!"
-        });
-
-    }
-
- 
-}));
-
-
-
-
-
-// university section 
 router.post("/create-university", asyncHandler(async (req, res) => {
     const data = { universityName, universityId, status } = req.body;
 
 
-    try {
+ 
          
         const result = await SubmitTX("CreateUniversity", data)
         res.json({
-            "msg": "University Created successfully",
-            "university": JSON.parse(result)
+            // "msg": "University Created successfully",
+            "output": result
         });
 
-    } catch (error) {
-
-        res.status(400).json({
-            "msg": " University already exist !!!!!!!!!!!!!"
-        });
-
-    }
+   
 
 }));
 
@@ -319,10 +205,9 @@ router.get("/get-university/:id", asyncHandler(async (req, res) => {
     try {
          
         const result = await SubmitTX("ReadAsset", data)
-        //  res.json({ result  });
+         res.json({ result  });
         res.json({
-            "msg": "University retrieved successfully",
-            "certificate": JSON.parse(result)
+            "output":  result
         });
     
 
@@ -339,10 +224,10 @@ router.get("/get-university/:id", asyncHandler(async (req, res) => {
 
 
 
-// GET All universities
+// *! GET All universities
 router.route("/get-all-universities").get(async (req, res, next) => {
     const data ={
-        "type": "authority"
+        "type": "university"
     }
 
 
@@ -350,7 +235,7 @@ router.route("/get-all-universities").get(async (req, res, next) => {
          
         const result = await SubmitTX("GetAllAssets",data)
         res.json({
-            "universities": JSON.parse(result)
+            "universities": (result)
         });
 
     } catch (error) {
@@ -366,6 +251,111 @@ router.route("/get-all-universities").get(async (req, res, next) => {
 });
 
 
+
+
+
+
+
+
+// CREATE Certificate
+
+//@desc Create new certificate
+//@route POST /create-certificate
+//@access pubic
+
+
+
+router.post("/create-certificate", asyncHandler(async (req, res) => {
+    const data = {      
+        fileHash,
+        IssueDate,
+        certID,  
+        studentID,
+        course,
+        details} = req.body;
+
+
+
+    try {
+         
+        const result = await SubmitTX("CreateCertificate", data)
+        console.log("res " + result);
+        res.json({
+            // "msg": "Certificate Created successfully",
+            "output":(result)
+        });
+    
+
+    } catch (error) {
+
+    
+    res.status(400).json({
+        "error": error.toString() // Return the error message or a default message
+    });
+    }
+    
+}));
+
+
+
+ 
+router.post("/share-certificate", asyncHandler(async (req, res) => {
+  
+    const  { id,shareWithID } = req.body;
+    const data = {
+        id, shareWithID, "prefix":"cert"
+    }
+ 
+    const result = await SubmitTX("ShareCertificate", data)
+    res.json({ 
+        "output":(result)
+    });
+}));
+
+
+
+// VERIFY Certificate
+// router.route("/verify-certificate/:verifierID/:studentID").put(async (req, res, next) => {
+//     const result = await callBlockchain('VerifyCertificate', req.params.verifierID, req.params.studentID);
+//     res.json(result);
+// });
+
+
+
+// GET Single Certificate
+router.get("/get-certificate/:id", asyncHandler(async (req, res) => {
+    const id = req.params.id;
+
+
+        const data = { id, "prefix":"cert" }
+
+        const result = await SubmitTX("ReadAsset", data)
+        res.json({ 
+            "output":  result
+        });
+    
+ 
+
+ 
+}));
+
+
+// GET All Certificates
+router.route("/get-all-certificates").get(async (req, res, next) => {
+    const data ={
+        "type": "certificate"
+    }
+
+ 
+         
+        const result = await SubmitTX("GetAllAssets",data)
+        res.json({
+            "output":result
+        });
+ 
+
+ 
+});
 
 
 module.exports = router;
