@@ -13,7 +13,7 @@ const chaincodeName = process.env.CHAINCODE_NAME || 'basic';
 
 const mspOrg1 = 'Org1MSP';
 const walletPath = path.join(__dirname, 'wallet');
-const org1UserId = 'saif';
+const org1UserId = 'ruhul';
 
 function prettyJSONString(inputString) {
     return JSON.stringify(JSON.parse(inputString), null, 2);
@@ -329,7 +329,7 @@ router.get("/get-certificate/:id", asyncHandler(async (req, res) => {
 
         const data = { id, "prefix":"cert" }
 
-        const result = await SubmitTX("ReadAsset", data)
+        const result = await SubmitTX("getCertificate", data)
         res.json({ 
             "output":  result
         });

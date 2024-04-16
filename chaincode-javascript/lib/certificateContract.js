@@ -1,15 +1,9 @@
 'use strict';
 
+ // *! Authority list 
+ // *! their main responsibility to manage universities
 
-// The CreateCertificate function allows a certificate provider to create a new certificate for a student.
-
-// The ShareCertificate function allows a student to mark their certificate as shared.
-
-// The VerifyCertificate function allows the certificate provider to verify a certificate. Only the certificate provider is authorized to perform this action.
-
-// The ReadCertificate and CertificateExists functions are utility functions to read a certificate and check if it exists
-
-
+// *! only authority member can manage authority list 
 
 
 const { Contract } = require('fabric-contract-api');
@@ -28,7 +22,7 @@ class CertificateContract extends Contract {
             const authorityId = await this.getCaller(ctx);
 
             const authority = {
-                "name": "Omar Saad",
+                "name": "Omer Saad",
                 "issuedBy": authorityId,
                 authorityId,
                 "otherInformation": "Contract owner",
@@ -191,16 +185,17 @@ class CertificateContract extends Contract {
         let certificate = await this.ReadAsset(ctx, data)
         certificate = JSON.parse(certificate.toString());
 
-        if ( await this.isIssuer(ctx,data) || await this.isCertificateHolderStudent(ctx,data)) {
-
-            let ussuerdata = { "id": await this.getIssuer(ctx, data), "prefix": "uni" }
-            certificate.university = JSON.parse(await this.ReadAsset(ctx, ussuerdata))
-
-            return JSON.stringify(certificate);
+        if(await this.isIssuer(ctx,data) || await this.isCertificateHolderStudent(ctx,data)||await this.isSharedWith(ctx,data)){
+         
+            return certificate;
         }
-        else{
-            throw new Error(`You aren't allowed to view this certificate`);
-        }
+
+        throw new Error(`You aren't allowed to view this certificate`);
+
+
+        // else{
+        //     throw new Error(`You aren't allowed to view this certificate`);
+        // }
     }
 
 
@@ -212,7 +207,15 @@ class CertificateContract extends Contract {
 
             let certificate = await this.ReadAsset(ctx, data)
             certificate = JSON.parse(certificate.toString());
-            certificate.shareWith.push(shareWithID);
+
+            if (!certificate.shareWith.includes(shareWithID)) {
+                certificate.shareWith.push(shareWithID);
+            }       
+            else {
+                throw new Error(`Verifier already exist`);
+    
+            }
+    
 
             await ctx.stub.putState("cert" + id, Buffer.from(JSON.stringify(certificate)));
 
@@ -370,14 +373,17 @@ class CertificateContract extends Contract {
         const callerID = await this.getCaller(ctx);
         const assetJSON = await this.ReadAsset(ctx, data)
         const asset = JSON.parse(assetJSON.toString());
+  
 
-        if (asset.studentID == callerID) {
-            return 1
+        if(asset.shareWith.includes(callerID)){
+            return 1; 
         }
         else {
             return 0;
         }
     }
+
+    
 
 
     async getIssuer(ctx, data) {
