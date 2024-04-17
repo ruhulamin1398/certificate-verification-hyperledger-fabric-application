@@ -12,7 +12,7 @@ cd ../test-network
 
 ./network.sh deployCC -ccn basic -ccp ../certificate-verification-hyperledger-fabric-application/chaincode-javascript/ -ccl javascript
 
-cd ../certificate-verification-hyperledger-fabric-application/
+cd ../certificate-verification-hyperledger-fabric-application
 
 
 rm -rf wallet/

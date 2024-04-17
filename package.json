@@ -11,7 +11,7 @@
   },
   "main": "index.js",
   "scripts": {
-    "start": "nodemon index.js",
+    "start": "nodemon src\/index.js",
     "lint": "eslint *.js",
     "pretest": "npm run lint"
   },
