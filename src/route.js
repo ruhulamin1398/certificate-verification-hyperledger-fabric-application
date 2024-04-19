@@ -2,18 +2,24 @@ const express = require("express");
 const router = express.Router();
 const asyncHandler = require("express-async-handler");
 const bodyParser = require('body-parser');
+
+const { generateHash } = require("./controllers/certificateController.js")
+
+
+
+
 const { Gateway, Wallets } = require('fabric-network');
 const FabricCAServices = require('fabric-ca-client');
 const path = require('path');
 const { buildCAClient, registerAndEnrollUser, enrollAdmin } = require('../../test-application/javascript/CAUtil.js');
 const { buildCCPOrg1, buildWallet } = require('../../test-application/javascript/AppUtil.js');
-
+const {userId} = require("../user.js")
 const channelName = process.env.CHANNEL_NAME || 'mychannel';
 const chaincodeName = process.env.CHAINCODE_NAME || 'basic';
 
 const mspOrg1 = 'Org1MSP';
 const walletPath = path.join(__dirname, 'wallet');
-const org1UserId = 'ruhul';
+const org1UserId = userId;
 
 function prettyJSONString(inputString) {
     return JSON.stringify(JSON.parse(inputString), null, 2);
@@ -74,7 +80,8 @@ async function SubmitTX(transactionName, data) {
     } catch (error) {
         console.error(`Failed to get instantiated chaincodes: ${error}`);
     }
-    // return result
+
+ 
     return JSON.parse(result.toString());
 }
 
@@ -84,45 +91,26 @@ async function SubmitTX(transactionName, data) {
 
 
 
-router.post("/test", asyncHandler(async (req, res) => {
-    const data ={
-        "prefix": "cert",
-        "id": "111"
-    }
 
-
- 
-        const result = await SubmitTX("getIssuer", data)
-
-        console.log("testttttttttttttttttttttttttttttttt ")
-        console.log(result)
-
-        console.log("teseeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee ")
-
-        res.json({result})
- 
-   
-
-}));
 
 
 
 
 
 router.post("/init", asyncHandler(async (req, res) => {
-    const data ={
+    const data = {
         "type": "authority"
     }
 
 
 
-        const result = await SubmitTX("initLedger", data)
-        res.json({
-            "data":(result)
-        });
+    const result = await SubmitTX("initLedger", data)
+    res.json({
+        "data": (result)
+    });
 
-   
-        
+
+
 
 }));
 
@@ -134,39 +122,39 @@ router.post("/init", asyncHandler(async (req, res) => {
 
 // university section 
 router.post("/add-authority", asyncHandler(async (req, res) => {
-    const data = { 
+    const data = {
         name,
         authorityId,
         otherInformation
     } = req.body;
 
- 
-        const result = await SubmitTX("addAuthorityMember", data)
-        res.json({
-            // "msg": "Authority added  successfully",
-            "output": (result)
-        });
 
-     
+    const result = await SubmitTX("addAuthorityMember", data)
+    res.json({
+        // "msg": "Authority added  successfully",
+        "output": (result)
+    });
+
+
 
 }));
 
 
 router.route("/get-all-authorities").get(async (req, res, next) => {
-    const data ={
+    const data = {
         "type": "authority"
     }
 
 
-        const result = await SubmitTX("GetAllAssets",data)
-      
-        res.json({
-            "output":  (result)
-        });
+    const result = await SubmitTX("GetAllAssets", data)
 
-   
+    res.json({
+        "output": (result)
+    });
 
- 
+
+
+
 });
 
 
@@ -180,15 +168,15 @@ router.post("/create-university", asyncHandler(async (req, res) => {
     const data = { universityName, universityId, status } = req.body;
 
 
- 
-         
-        const result = await SubmitTX("CreateUniversity", data)
-        res.json({
-            // "msg": "University Created successfully",
-            "output": result
-        });
 
-   
+
+    const result = await SubmitTX("CreateUniversity", data)
+    res.json({
+        // "msg": "University Created successfully",
+        "output": result
+    });
+
+
 
 }));
 
@@ -198,18 +186,18 @@ router.post("/create-university", asyncHandler(async (req, res) => {
 router.get("/get-university/:id", asyncHandler(async (req, res) => {
     const id = req.params.id;
 
-    const data = { id, "prefix":"uni" }
+    const data = { id, "prefix": "uni" }
 
 
 
     try {
-         
+
         const result = await SubmitTX("ReadAsset", data)
-         res.json({ result  });
+        res.json({ result });
         res.json({
-            "output":  result
+            "output": result
         });
-    
+
 
     } catch (error) {
 
@@ -219,21 +207,21 @@ router.get("/get-university/:id", asyncHandler(async (req, res) => {
 
     }
 
- 
+
 }));
 
 
 
 // *! GET All universities
 router.route("/get-all-universities").get(async (req, res, next) => {
-    const data ={
+    const data = {
         "type": "university"
     }
 
 
     try {
-         
-        const result = await SubmitTX("GetAllAssets",data)
+
+        const result = await SubmitTX("GetAllAssets", data)
         res.json({
             "universities": (result)
         });
@@ -247,7 +235,7 @@ router.route("/get-all-universities").get(async (req, res, next) => {
     }
 
 
-  
+
 });
 
 
@@ -266,49 +254,52 @@ router.route("/get-all-universities").get(async (req, res, next) => {
 
 
 router.post("/create-certificate", asyncHandler(async (req, res) => {
-    const data = {      
-        fileHash,
+    let data = {
         IssueDate,
-        certID,  
+        certID,
         studentID,
         course,
-        details} = req.body;
+        details
+    } = req.body;
+    const fileHash = await generateHash(data);
+    data.fileHash = fileHash;
+   
 
 
 
     try {
-         
+
         const result = await SubmitTX("CreateCertificate", data)
         console.log("res " + result);
         res.json({
             // "msg": "Certificate Created successfully",
-            "output":(result)
+            "output": (result)
         });
-    
+
 
     } catch (error) {
 
-    
-    res.status(400).json({
-        "error": error.toString() // Return the error message or a default message
-    });
+
+        res.status(400).json({
+            "error": error.toString() // Return the error message or a default message
+        });
     }
-    
+
 }));
 
 
 
- 
+
 router.post("/share-certificate", asyncHandler(async (req, res) => {
-  
-    const  { id,shareWithID } = req.body;
+
+    const { id, shareWithID } = req.body;
     const data = {
-        id, shareWithID, "prefix":"cert"
+        id, shareWithID, "prefix": "cert"
     }
- 
+
     const result = await SubmitTX("ShareCertificate", data)
-    res.json({ 
-        "output":(result)
+    res.json({
+        "output": (result)
     });
 }));
 
@@ -327,34 +318,34 @@ router.get("/get-certificate/:id", asyncHandler(async (req, res) => {
     const id = req.params.id;
 
 
-        const data = { id, "prefix":"cert" }
+    const data = { id, "prefix": "cert" }
 
-        const result = await SubmitTX("getCertificate", data)
-        res.json({ 
-            "output":  result
-        });
-    
- 
+    const result = await SubmitTX("getCertificate", data)
+    res.json({
+        "output": result
+    });
 
- 
+
+
+
 }));
 
 
 // GET All Certificates
 router.route("/get-all-certificates").get(async (req, res, next) => {
-    const data ={
+    const data = {
         "type": "certificate"
     }
 
- 
-         
-        const result = await SubmitTX("GetAllAssets",data)
-        res.json({
-            "output":result
-        });
- 
 
- 
+
+    const result = await SubmitTX("GetAllAssets", data)
+    res.json({
+        "output": result
+    });
+
+
+
 });
 
 
