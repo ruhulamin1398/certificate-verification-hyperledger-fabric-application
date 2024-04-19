@@ -13,13 +13,13 @@ const FabricCAServices = require('fabric-ca-client');
 const path = require('path');
 const { buildCAClient, registerAndEnrollUser, enrollAdmin } = require('../../test-application/javascript/CAUtil.js');
 const { buildCCPOrg1, buildWallet } = require('../../test-application/javascript/AppUtil.js');
-const {userId} = require("../user.js")
+const {loginUserAccount} = require("../user.js")
 const channelName = process.env.CHANNEL_NAME || 'mychannel';
 const chaincodeName = process.env.CHAINCODE_NAME || 'basic';
 
 const mspOrg1 = 'Org1MSP';
 const walletPath = path.join(__dirname, 'wallet');
-const org1UserId = userId;
+const org1UserId = loginUserAccount;
 
 function prettyJSONString(inputString) {
     return JSON.stringify(JSON.parse(inputString), null, 2);
