@@ -123,7 +123,7 @@ class MyWorkload extends WorkloadModuleBase {
         const randomId = Math.floor(Math.random() * this.roundArguments.assets);
 
 
-        let data = { "id": randomId, "prefix": "cert" }
+        let data = { "id":  "y" +randomId, "prefix": "cert" }
         data = JSON.stringify(data)
 
 

@@ -18,7 +18,7 @@ test:
             contractId: basic
       - label: Read All Authority Members
         description: Read asset benchmark
-        txDuration: 30
+        txDuration: 10
         rateControl:
           type: fixed-load
           opts:
@@ -31,7 +31,7 @@ test:
 
       - label: Create university
         description: add a new university
-        txDuration: 30
+        txDuration: 10
         rateControl:
           type: fixed-load
           opts:
@@ -43,7 +43,7 @@ test:
             contractId: basic
       - label: Create certificate
         description: add a new Certificate
-        txDuration: 30
+        txDuration: 10
         rateControl:
           type: fixed-load
           opts:
@@ -55,7 +55,7 @@ test:
             contractId: basic
       - label: Share certificate
         description: share Certificate
-        txDuration: 1
+        txDuration: 10
         rateControl:
           type: fixed-load
           opts:
@@ -67,7 +67,7 @@ test:
             contractId: basic
       - label: Verify certificate
         description: verify Certificate
-        txDuration: 1
+        txDuration: 10
         rateControl:
           type: fixed-load
           opts:
@@ -75,6 +75,6 @@ test:
         workload:
           module: workload/verifyCertificate.js
           arguments:
-            assets: 4
+            assets: 10
             contractId: basic
 
