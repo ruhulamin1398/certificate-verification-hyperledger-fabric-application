@@ -1,7 +1,7 @@
 'use strict';
 
- // *! Authority list 
- // *! their main responsibility to manage universities
+// *! Authority list 
+// *! their main responsibility to manage universities
 
 // *! only authority member can manage authority list 
 
@@ -36,22 +36,22 @@ class CertificateContract extends Contract {
 
 
                 await ctx.stub.putState("aut" + authorityId, Buffer.from(JSON.stringify(authority)));
-                
-                
-                        const university = {
 
-            "issuedBy": authorityId,
-            "universityName":"university1",
-            "universityId" :authorityId,
-            "status": 1,
 
-            "type": "university"
-        };
+                const university = {
 
-        // Store the certificate in the world state
-        await ctx.stub.putState("uni" + authorityId, Buffer.from(JSON.stringify(university)));
-        
-        
+                    "issuedBy": authorityId,
+                    "universityName": "university1",
+                    "universityId": authorityId,
+                    "status": 1,
+
+                    "type": "university"
+                };
+
+                // Store the certificate in the world state
+                await ctx.stub.putState("uni" + authorityId, Buffer.from(JSON.stringify(university)));
+
+
 
 
             }
@@ -201,8 +201,8 @@ class CertificateContract extends Contract {
         let certificate = await this.ReadAsset(ctx, data)
         certificate = JSON.parse(certificate.toString());
 
-        if(await this.isIssuer(ctx,data) || await this.isCertificateHolderStudent(ctx,data)||await this.isSharedWith(ctx,data)){
-         
+        if (await this.isIssuer(ctx, data) || await this.isCertificateHolderStudent(ctx, data) || await this.isSharedWith(ctx, data)) {
+
             return certificate;
         }
 
@@ -226,12 +226,12 @@ class CertificateContract extends Contract {
 
             if (!certificate.shareWith.includes(shareWithID)) {
                 certificate.shareWith.push(shareWithID);
-            }       
+            }
             else {
                 throw new Error(`Verifier already exist`);
-    
+
             }
-    
+
 
             await ctx.stub.putState("cert" + id, Buffer.from(JSON.stringify(certificate)));
 
@@ -241,10 +241,18 @@ class CertificateContract extends Contract {
 
         }
         else {
-            throw new Error(`Only certificate Holder student can share certificate`);
 
+
+        const callerID = await this.getCaller(ctx);
+        const assetJSON = await this.ReadAsset(ctx, data)
+        const asset = JSON.parse(assetJSON.toString());
+
+    
+
+            throw new Error(`Only certificate Holder student can share certificate  Student is ${asset.studentID}  and caller is ${callerID}`);
+
+      
         }
-
 
 
     }
@@ -341,18 +349,18 @@ class CertificateContract extends Contract {
 
 
     async ReadData(ctx, id) {
-  
 
-        const exists = await this.isExists(ctx,id);
+
+        const exists = await this.isExists(ctx, id);
         if (exists) {
-        	const assetJSON = await ctx.stub.getState(prefix + id);
-        	const asset = JSON.parse(assetJSON.toString());
-        	return JSON.stringify(asset);
+            const assetJSON = await ctx.stub.getState(prefix + id);
+            const asset = JSON.parse(assetJSON.toString());
+            return JSON.stringify(asset);
         }
-        else{
+        else {
             throw new Error(`does not exist`);
         }
-        
+
 
 
     }
@@ -436,17 +444,17 @@ class CertificateContract extends Contract {
         const callerID = await this.getCaller(ctx);
         const assetJSON = await this.ReadAsset(ctx, data)
         const asset = JSON.parse(assetJSON.toString());
-  
 
-        if(asset.shareWith.includes(callerID)){
-            return 1; 
+
+        if (asset.shareWith.includes(callerID)) {
+            return 1;
         }
         else {
             return 0;
         }
     }
 
-    
+
 
 
     async getIssuer(ctx, data) {

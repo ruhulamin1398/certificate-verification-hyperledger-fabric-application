@@ -15,7 +15,7 @@ const { buildCAClient, registerAndEnrollUser, enrollAdmin } = require('../../tes
 const { buildCCPOrg1, buildWallet } = require('../../test-application/javascript/AppUtil.js');
 const {loginUserAccount} = require("../user.js")
 const channelName = process.env.CHANNEL_NAME || 'mychannel';
-const chaincodeName = process.env.CHAINCODE_NAME || 'cert';
+const chaincodeName = process.env.CHAINCODE_NAME || 'basic';
 
 const mspOrg1 = 'Org1MSP';
 const walletPath = path.join(__dirname, 'wallet');

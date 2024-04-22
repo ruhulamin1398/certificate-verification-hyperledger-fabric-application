@@ -7,7 +7,7 @@ caliper:
 channels:
   - channelName: mychannel
     contracts:
-    - id: basic2
+    - id: basic
 
 organizations:
   - mspid: Org1MSP
@@ -15,7 +15,7 @@ organizations:
       certificates:
       - name: 'User1'
         clientPrivateKey:
-          path: '../../test-network/organizations/peerOrganizations/org1.example.com/users/User1@org1.example.com/msp/keystore/e208bd9775d7e15c9f80e52ff4ce96b74d890427e4c4cdb38ba90e13f4680448_sk'
+          path: '../../test-network/organizations/peerOrganizations/org1.example.com/users/User1@org1.example.com/msp/keystore/51ff29f6a86d38ab546f7797860ec95126af1f7d41603ba92f745c9a3c299dce_sk'
         clientSignedCert:
           path: '../../test-network/organizations/peerOrganizations/org1.example.com/users/User1@org1.example.com/msp/signcerts/cert.pem'
     connectionProfile:

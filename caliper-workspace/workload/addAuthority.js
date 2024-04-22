@@ -23,6 +23,39 @@ class MyWorkload extends WorkloadModuleBase {
             };
 
             await this.sutAdapter.sendRequests(request);
+
+
+
+
+           
+
+            let  data = {
+                 "name": "Omer Saad",
+            "issuedBy": "User1",
+            "authorityId":"saif",
+            "otherInformation": "Contract owner",
+            "status": 1,
+            "type": "authority"
+        }
+        data = JSON.stringify(data)
+            const myArgs = {
+                contractId: this.roundArguments.contractId,
+                contractFunction: 'addAuthorityMember',
+                invokerIdentity: 'User1',
+                contractArguments: [data],
+                readOnly: true
+            };
+    console.log("================================================================= ")
+            let resresult = await this.sutAdapter.sendRequests(myArgs);
+            console.log(JSON.stringify(resresult))
+
+
+    console.log("================================================================= ")
+    
+      
+
+
+
         
     }
 
@@ -45,8 +78,7 @@ class MyWorkload extends WorkloadModuleBase {
             contractArguments: [data],
             readOnly: true
         };
-
-        await this.sutAdapter.sendRequests(myArgs);
+   await this.sutAdapter.sendRequests(myArgs);
     }
 
     async cleanupWorkloadModule() {

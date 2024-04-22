@@ -1,3 +1,5 @@
+const user = "User1"
+
 // network owner 
 const owner = "omar"  
 
@@ -27,7 +29,7 @@ const verifierId3 = "tajul"
 
 //! type user name by which one you want to login
 
-const loginUserAccount = authorityId
+const loginUserAccount = user
 
 
 

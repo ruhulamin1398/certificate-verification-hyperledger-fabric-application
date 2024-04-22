@@ -1,10 +1,10 @@
 test:
-    name: basic2-contract-benchmark
+    name: basic-contract-benchmark
     description: test benchmark
     workers:
-      number: 10
+      number: 1
     rounds:
-      - label: Add Authority Members
+      - label: addAuthorityMember()
         description: Add Authority Members
         txDuration: 30
         rateControl:
@@ -15,7 +15,7 @@ test:
           module: workload/addAuthority.js
           arguments:
             assets: 2
-            contractId: basic2
+            contractId: basic
       - label: Read All Authority Members
         description: Read asset benchmark
         txDuration: 30
@@ -27,7 +27,7 @@ test:
           module: workload/authority.js
           arguments:
             assets: 2
-            contractId: basic2
+            contractId: basic
 
       - label: Create university
         description: add a new university
@@ -40,7 +40,7 @@ test:
           module: workload/createUniversity.js
           arguments:
             assets: 2
-            contractId: basic2
+            contractId: basic
       - label: Create certificate
         description: add a new Certificate
         txDuration: 30
@@ -52,17 +52,29 @@ test:
           module: workload/createCertificate.js
           arguments:
             assets: 2
-            contractId: basic2
+            contractId: basic
+      - label: Share certificate
+        description: share Certificate
+        txDuration: 1
+        rateControl:
+          type: fixed-load
+          opts:
+            transactionLoad: 2
+        workload:
+          module: workload/shareCertificate.js
+          arguments:
+            assets: 4
+            contractId: basic
+      - label: Verify certificate
+        description: verify Certificate
+        txDuration: 1
+        rateControl:
+          type: fixed-load
+          opts:
+            transactionLoad: 2
+        workload:
+          module: workload/verifyCertificate.js
+          arguments:
+            assets: 4
+            contractId: basic
 
-      # - label: Read All Authority Members
-      #   description: Read asset benchmark
-      #   txDuration: 30
-      #   rateControl:
-      #     type: fixed-load
-      #     opts:
-      #       transactionLoad: 2
-      #   workload:
-      #     module: workload/authority.js
-      #     arguments:
-      #       assets: 10
-      #       contractId: cert
