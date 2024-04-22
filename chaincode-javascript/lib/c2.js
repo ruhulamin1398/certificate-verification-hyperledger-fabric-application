@@ -1,15 +1,9 @@
 'use strict';
 
+ // *! Authority list 
+ // *! their main responsibility to manage universities
 
-// The CreateCertificate function allows a certificate provider to create a new certificate for a student.
-
-// The ShareCertificate function allows a student to mark their certificate as shared.
-
-// The VerifyCertificate function allows the certificate provider to verify a certificate. Only the certificate provider is authorized to perform this action.
-
-// The ReadCertificate and CertificateExists functions are utility functions to read a certificate and check if it exists
-
-
+// *! only authority member can manage authority list 
 
 
 const { Contract } = require('fabric-contract-api');
@@ -25,66 +19,47 @@ class CertificateContract extends Contract {
     async initLedger(ctx) {
         // Access flag using this.flag
         if (this.flag === 0) {
-            const authorityId = await this.getCaller(ctx);
-            
+            const authorityId = "ruhul"
+
             const authority = {
-                "type": "authority",
-                "name": "Omar Saad",
+                "name": "Omer Saad",
                 "issuedBy": authorityId,
                 authorityId,
                 "otherInformation": "Contract owner",
-                "status": 1
+                "status": 1,
+                "type": "authority"
             };
 
-            const exists =await this.isExists(ctx, "aut" + authority.authorityId);
+            const exists = await this.isExists(ctx, "aut" + authority.authorityId);
             if (!exists) {
-               
 
 
-        await ctx.stub.putState("aut" + authorityId, Buffer.from(JSON.stringify(authority)));
+
+                await ctx.stub.putState("aut" + authorityId, Buffer.from(JSON.stringify(authority)));
 
 
             }
             this.flag = 1;
             return authority;
         }
-        else{
+        else {
             throw new Error(`Already inititalized`);
         }
     }
 
 
+    
 
-
-    async addAuthorityMember(ctx, data) {
-        const callerID = await this.getCaller(ctx);
-
-        const isAuthorityMember = await this.isAuthority(ctx);
-        if (!isAuthorityMember) {
-            throw new Error("Only authority members ar allowed to perform this function");
-        }
-
-        
-        const inputData = JSON.parse(data);
-        const {
-            name,
-            authorityId,
-            otherInformation
-        } = inputData;
-
-        // Check if the certificate already exists
-        const exists = await this.isExists(ctx, "aut" + authorityId);
-        if (exists) {
-            throw new Error(` ${authorityId} already exists`);
-        }
+    async addAuthorityMember(ctx,   callerID  , name, authorityId, otherInformation) {
 
         const authority = {
-            "type": "authority",
             name,
             authorityId,
             "issuedBy": callerID,
             otherInformation,
-            "status": 1
+            "status": 1,
+
+            "type": "authority"
         };
 
 
@@ -92,6 +67,35 @@ class CertificateContract extends Contract {
 
         return JSON.stringify(authority);
     }
+
+
+
+
+    async GetAllAuthority(ctx ) { 
+
+      
+        const allResults = [];
+        // range query with empty string for startKey and endKey does an open-ended query of all assets in the chaincode namespace.
+        const iterator = await ctx.stub.getStateByRange('', '');
+        let result = await iterator.next();
+        while (!result.done) {
+            const strValue = Buffer.from(result.value.value.toString()).toString('utf8');
+            let record;
+            try {
+                record = JSON.parse(strValue);
+            } catch (err) {
+                console.log(err);
+                record = strValue;
+            }
+           
+
+                allResults.push(record);
+     
+            result = await iterator.next();
+        }
+        return JSON.stringify(allResults);
+    }
+
 
 
 
@@ -119,12 +123,13 @@ class CertificateContract extends Contract {
         }
 
         const university = {
-            "type": "university",
 
             "issuedBy": callerID,
             universityName,
             universityId,
-            "status": 1
+            "status": 1,
+
+            "type": "university"
         };
 
         // Store the certificate in the world state
@@ -142,8 +147,8 @@ class CertificateContract extends Contract {
 
         const callerID = await this.getCaller(ctx);
         const isUniversityAdmin = await this.isUniversityAdmin(ctx);
-        if (!isAuthorityMember) {
-            throw new Error("Only authority members ar allowed to perform this function");
+        if (!isUniversityAdmin) {
+            throw new Error("Only universities members ar allowed to perform this function");
         }
 
 
@@ -153,7 +158,7 @@ class CertificateContract extends Contract {
         const {
             fileHash,
             IssueDate,
-            certID,  
+            certID,
             studentID,
             course,
             details
@@ -166,14 +171,16 @@ class CertificateContract extends Contract {
         }
 
         const certificate = {
-            "type": "certificate",
             "issuedBy": callerID,
             fileHash,
             IssueDate,
-            certID,  
+            certID,
             studentID,
             course,
-            details
+            details,
+
+            "type": "certificate",
+            "shareWith": []
         };
 
         // Store the certificate in the world state
@@ -183,31 +190,67 @@ class CertificateContract extends Contract {
     }
 
     async getCertificate(ctx, data) {
-        // Parse the incoming data
-        const inputData = JSON.parse(data);
-        const id = inputData.id;
 
-        let data = { id, "prefix":"cert" }
+        let certificate = await this.ReadAsset(ctx, data)
+        certificate = JSON.parse(certificate.toString());
 
-        let certificate = await this.ReadAsset(ctx ,data )
-        certificate =  JSON.parse(certificate.toString());
-
+        if(await this.isIssuer(ctx,data) || await this.isCertificateHolderStudent(ctx,data)||await this.isSharedWith(ctx,data)){
          
+            return certificate;
+        }
 
-         data = { "id":await this.getIssuer(ctx, data), "prefix":"uni" }
-        certificate.university= JSON.parse(await this.ReadAsset(ctx ,data ))
- 
-        return  certificate;
+        throw new Error(`You aren't allowed to view this certificate`);
+
+
+        // else{
+        //     throw new Error(`You aren't allowed to view this certificate`);
+        // }
     }
+
+
+    async ShareCertificate(ctx, data) {
+        const { shareWithID, id } = JSON.parse(data);
+
+        const isholder = await this.isCertificateHolderStudent(ctx, data)
+        if (isholder) {
+
+            let certificate = await this.ReadAsset(ctx, data)
+            certificate = JSON.parse(certificate.toString());
+
+            if (!certificate.shareWith.includes(shareWithID)) {
+                certificate.shareWith.push(shareWithID);
+            }       
+            else {
+                throw new Error(`Verifier already exist`);
+    
+            }
+    
+
+            await ctx.stub.putState("cert" + id, Buffer.from(JSON.stringify(certificate)));
+
+            return JSON.stringify(certificate);
+
+
+
+        }
+        else {
+            throw new Error(`Only certificate Holder student can share certificate`);
+
+        }
+
+
+
+    }
+
 
 
 
     async ReadAsset(ctx, data) {
         // Parse the incoming data
-        const inputData = JSON.parse(data);
+        const { prefix, id } = JSON.parse(data);
 
-        const prefix = inputData.prefix;
-        const id = inputData.id;
+        // const prefix = inputData.prefix;
+        // const id = inputData.id;
 
 
         const exists = await this.isExists(ctx, prefix + id);
@@ -216,8 +259,9 @@ class CertificateContract extends Contract {
         }
 
         const assetJSON = await ctx.stub.getState(prefix + id);
- 
-        return JSON.parse(assetJSON.toString());
+
+        const asset = JSON.parse(assetJSON.toString());
+        return JSON.stringify(asset);
     }
 
 
@@ -231,7 +275,7 @@ class CertificateContract extends Contract {
         const inputData = JSON.parse(data);
         const type = inputData.type;
 
-        if(type =="authority"){
+        if (type == "authority") {
             const isAuthorityMember = await this.isAuthority(ctx);
             if (!isAuthorityMember) {
                 throw new Error("Only authority members ar allowed to perform this function");
@@ -263,6 +307,53 @@ class CertificateContract extends Contract {
 
 
 
+
+    async GETAll(ctx) {
+
+        const allResults = [];
+        // range query with empty string for startKey and endKey does an open-ended query of all assets in the chaincode namespace.
+        const iterator = await ctx.stub.getStateByRange('', '');
+        let result = await iterator.next();
+        while (!result.done) {
+            const strValue = Buffer.from(result.value.value.toString()).toString('utf8');
+            let record;
+            try {
+                record = JSON.parse(strValue);
+            } catch (err) {
+                console.log(err);
+                record = strValue;
+            }
+            if (record.type == type) {
+
+                allResults.push(record);
+            }
+            result = await iterator.next();
+        }
+        return JSON.stringify(allResults);
+    }
+
+
+    async ReadData(ctx, id) {
+  
+
+        const exists = await this.isExists(ctx,id);
+        if (exists) {
+        	const assetJSON = await ctx.stub.getState(prefix + id);
+        	const asset = JSON.parse(assetJSON.toString());
+        	return JSON.stringify(asset);
+        }
+        else{
+            throw new Error(`does not exist`);
+        }
+        
+
+
+    }
+
+
+
+
+
     async isExists(ctx, id) {
 
         const certificateJSON = await ctx.stub.getState(id);
@@ -280,7 +371,7 @@ class CertificateContract extends Contract {
             throw new Error(`Somthing went wrong to get id `);
         }
     }
-    async isAuthority(ctx){
+    async isAuthority(ctx) {
         const callerID = await this.getCaller(ctx);
         const exists = await this.isExists(ctx, "aut" + callerID);
         if (exists) {
@@ -293,7 +384,7 @@ class CertificateContract extends Contract {
     }
 
 
-    async isUniversityAdmin(ctx){
+    async isUniversityAdmin(ctx) {
         const callerID = await this.getCaller(ctx);
         const exists = await this.isExists(ctx, "uni" + callerID);
         if (exists) {
@@ -305,16 +396,13 @@ class CertificateContract extends Contract {
 
     }
 
-    async isOwner(ctx, data){
-        
+    async isIssuer(ctx, data) {
 
-        const inputData = JSON.parse(data);
-        const id = inputData.id;
+        const callerID = await this.getCaller(ctx);
+        const assetJSON = await this.ReadAsset(ctx, data)
+        const asset = JSON.parse(assetJSON.toString());
 
-
-
-        const exists = await this.isExists(ctx, "aut" + callerID);
-        if (exists) {
+        if (asset.issuedBy == callerID) {
             return 1
         }
         else {
@@ -322,23 +410,51 @@ class CertificateContract extends Contract {
         }
 
     }
+    async isCertificateHolderStudent(ctx, data) {
+
+        const callerID = await this.getCaller(ctx);
+        const assetJSON = await this.ReadAsset(ctx, data)
+        const asset = JSON.parse(assetJSON.toString());
+
+        if (asset.studentID == callerID) {
+            return 1
+        }
+        else {
+            return 0;
+        }
+    }
+
+    async isSharedWith(ctx, data) {
+
+        const callerID = await this.getCaller(ctx);
+        const assetJSON = await this.ReadAsset(ctx, data)
+        const asset = JSON.parse(assetJSON.toString());
+  
+
+        if(asset.shareWith.includes(callerID)){
+            return 1; 
+        }
+        else {
+            return 0;
+        }
+    }
+
+    
 
 
-    async getIssuer(ctx, data){
-        
+    async getIssuer(ctx, data) {
 
-        const inputData = JSON.parse(data);
-        const id = inputData.id;
-        const prefix = inputData.prefix;
+        const assetJSON = await this.ReadAsset(ctx, data)
+        const asset = JSON.parse(assetJSON.toString());
 
-     
-        const data = { id, prefix }
-        const assetJSON = await this.ReadAsset(ctx ,data )
-        const issuer = JSON.parse(assetJSON.toString());
+
+        const issuerdata = { "id": asset.issuedBy, "prefix": "uni" }
+        const issuerjson = await this.ReadAsset(ctx, issuerdata)
+        const issuer = JSON.parse(issuerjson.toString());
         return issuer;
 
     }
-    
+
 
 
 

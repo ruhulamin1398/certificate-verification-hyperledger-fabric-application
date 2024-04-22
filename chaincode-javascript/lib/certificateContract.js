@@ -36,6 +36,22 @@ class CertificateContract extends Contract {
 
 
                 await ctx.stub.putState("aut" + authorityId, Buffer.from(JSON.stringify(authority)));
+                
+                
+                        const university = {
+
+            "issuedBy": authorityId,
+            "universityName":"university1",
+            "universityId" :authorityId,
+            "status": 1,
+
+            "type": "university"
+        };
+
+        // Store the certificate in the world state
+        await ctx.stub.putState("uni" + authorityId, Buffer.from(JSON.stringify(university)));
+        
+        
 
 
             }
@@ -292,6 +308,53 @@ class CertificateContract extends Contract {
             result = await iterator.next();
         }
         return JSON.stringify(allResults);
+    }
+
+
+
+
+
+
+    async GETAll(ctx) {
+
+        const allResults = [];
+        // range query with empty string for startKey and endKey does an open-ended query of all assets in the chaincode namespace.
+        const iterator = await ctx.stub.getStateByRange('', '');
+        let result = await iterator.next();
+        while (!result.done) {
+            const strValue = Buffer.from(result.value.value.toString()).toString('utf8');
+            let record;
+            try {
+                record = JSON.parse(strValue);
+            } catch (err) {
+                console.log(err);
+                record = strValue;
+            }
+            if (record.type == type) {
+
+                allResults.push(record);
+            }
+            result = await iterator.next();
+        }
+        return JSON.stringify(allResults);
+    }
+
+
+    async ReadData(ctx, id) {
+  
+
+        const exists = await this.isExists(ctx,id);
+        if (exists) {
+        	const assetJSON = await ctx.stub.getState(prefix + id);
+        	const asset = JSON.parse(assetJSON.toString());
+        	return JSON.stringify(asset);
+        }
+        else{
+            throw new Error(`does not exist`);
+        }
+        
+
+
     }
 
 

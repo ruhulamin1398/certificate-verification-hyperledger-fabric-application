@@ -1,0 +1,68 @@
+test:
+    name: basic2-contract-benchmark
+    description: test benchmark
+    workers:
+      number: 10
+    rounds:
+      - label: Add Authority Members
+        description: Add Authority Members
+        txDuration: 30
+        rateControl:
+          type: fixed-load
+          opts:
+            transactionLoad: 2
+        workload:
+          module: workload/addAuthority.js
+          arguments:
+            assets: 2
+            contractId: basic2
+      - label: Read All Authority Members
+        description: Read asset benchmark
+        txDuration: 30
+        rateControl:
+          type: fixed-load
+          opts:
+            transactionLoad: 2
+        workload:
+          module: workload/authority.js
+          arguments:
+            assets: 2
+            contractId: basic2
+
+      - label: Create university
+        description: add a new university
+        txDuration: 30
+        rateControl:
+          type: fixed-load
+          opts:
+            transactionLoad: 2
+        workload:
+          module: workload/createUniversity.js
+          arguments:
+            assets: 2
+            contractId: basic2
+      - label: Create certificate
+        description: add a new Certificate
+        txDuration: 30
+        rateControl:
+          type: fixed-load
+          opts:
+            transactionLoad: 2
+        workload:
+          module: workload/createCertificate.js
+          arguments:
+            assets: 2
+            contractId: basic2
+
+      # - label: Read All Authority Members
+      #   description: Read asset benchmark
+      #   txDuration: 30
+      #   rateControl:
+      #     type: fixed-load
+      #     opts:
+      #       transactionLoad: 2
+      #   workload:
+      #     module: workload/authority.js
+      #     arguments:
+      #       assets: 10
+      #       contractId: cert
