@@ -1,0 +1,22 @@
+test:
+    name: basic-contract-benchmark
+    description: test benchmark
+    workers:
+      number: 1
+    rounds:
+      - label: Read operation 400 TPS
+        txDuration: 60
+        rateControl:
+          type: fixed-rate
+          opts:
+            tps: 400
+        workload:
+          module: workload/verifyCertificate.js
+          arguments:
+            assets: 2
+            contractId: basic
+
+ 
+ 
+ 
+ 

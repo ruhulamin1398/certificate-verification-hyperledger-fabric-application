@@ -1,0 +1,56 @@
+test:
+    name: basic-contract-benchmark
+    description: test benchmark
+    workers:
+      number: 1
+    rounds:
+      - label: 100 Tps 
+        txDuration: 60
+        rateControl:
+          type: fixed-rate
+          opts:
+            tps: 100
+        workload:
+          module: workload/verifyCertificate.js
+          arguments:
+            assets: 2
+            contractId: basic
+ 
+      - label: 200 Tps
+        txDuration: 60
+        rateControl:
+          type: fixed-rate
+          opts:
+            tps: 200
+        workload:
+          module: workload/verifyCertificate.js
+          arguments:
+            assets: 2
+            contractId: basic
+ 
+      - label: 500 Tps 
+        txDuration: 60
+        rateControl:
+          type: fixed-rate
+          opts:
+            tps: 500
+        workload:
+          module: workload/verifyCertificate.js
+          arguments:
+            assets: 2
+            contractId: basic
+ 
+      - label: 1000 TPS 
+        txDuration: 60
+        rateControl:
+          type: fixed-rate
+          opts:
+            tps: 1000
+        workload:
+          module: workload/verifyCertificate.js
+          arguments:
+            assets: 2
+            contractId: basic
+ 
+ 
+ 
