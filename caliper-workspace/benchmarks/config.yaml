@@ -2,76 +2,76 @@ test:
     name: basic-contract-benchmark
     description: test benchmark
     workers:
-      number: 1
+      number: 3
     rounds:
       - label: addAuthorityMember()
         description: Add Authority Members
-        txDuration: 30
+        txDuration: 60
         rateControl:
           type: fixed-load
           opts:
-            transactionLoad: 2
+            transactionLoad: 50
         workload:
           module: workload/addAuthority.js
           arguments:
-            assets: 2
+            assets: 10
             contractId: basic
       - label: Read All Authority Members
         description: Read asset benchmark
-        txDuration: 10
+        txDuration: 60
         rateControl:
           type: fixed-load
           opts:
-            transactionLoad: 2
+            transactionLoad: 50
         workload:
           module: workload/authority.js
           arguments:
-            assets: 2
+            assets: 10
             contractId: basic
 
       - label: Create university
         description: add a new university
-        txDuration: 10
+        txDuration: 60
         rateControl:
           type: fixed-load
           opts:
-            transactionLoad: 2
+            transactionLoad: 50
         workload:
           module: workload/createUniversity.js
           arguments:
-            assets: 2
+            assets: 10
             contractId: basic
       - label: Create certificate
         description: add a new Certificate
-        txDuration: 10
+        txDuration: 60
         rateControl:
           type: fixed-load
           opts:
-            transactionLoad: 2
+            transactionLoad: 50
         workload:
           module: workload/createCertificate.js
           arguments:
-            assets: 2
+            assets: 10
             contractId: basic
       - label: Share certificate
         description: share Certificate
-        txDuration: 10
+        txDuration: 60
         rateControl:
           type: fixed-load
           opts:
-            transactionLoad: 2
+            transactionLoad: 50
         workload:
           module: workload/shareCertificate.js
           arguments:
-            assets: 4
+            assets: 10
             contractId: basic
       - label: Verify certificate
         description: verify Certificate
-        txDuration: 10
+        txDuration: 60
         rateControl:
           type: fixed-load
           opts:
-            transactionLoad: 2
+            transactionLoad: 50
         workload:
           module: workload/verifyCertificate.js
           arguments:

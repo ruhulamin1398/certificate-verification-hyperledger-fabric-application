@@ -128,18 +128,16 @@
                 <li>DLT: &nbsp<span style="font-weight: 500;">fabric</span></li>
                 <li>Name: &nbsp<span style="font-weight: 500;">basic-contract-benchmark</span></li>
                 <li>Description: &nbsp<span style="font-weight: 500;">test benchmark</span></li>
-                <li>Benchmark Rounds: &nbsp<span style="font-weight: 500;">6</span></li>
+                <li>Benchmark Rounds: &nbsp<span style="font-weight: 500;">4</span></li>
                 <li><a href="#benchmarkInfo">Details</a></li>
             </ul>
             <ul>
                 <h3>&nbspBenchmark results</h3>
                 <li><a href="#benchmarksummary">Summary</a></li>
-                    <li><a href="#addAuthorityMember()">addAuthorityMember()</a></li>
-                    <li><a href="#Read All Authority Members">Read All Authority Members</a></li>
-                    <li><a href="#Create university">Create university</a></li>
-                    <li><a href="#Create certificate">Create certificate</a></li>
-                    <li><a href="#Share certificate">Share certificate</a></li>
-                    <li><a href="#Verify certificate">Verify certificate</a></li>
+                    <li><a href="#100 Tps">100 Tps</a></li>
+                    <li><a href="#200 Tps">200 Tps</a></li>
+                    <li><a href="#500 Tps">500 Tps</a></li>
+                    <li><a href="#1000 TPS">1000 TPS</a></li>
             </ul>
             <ul>
                 <h3>&nbspSystem under test</h3>
@@ -157,149 +155,101 @@
                     </tr>
 
                     <tr>
-                         <td>addAuthorityMember()</td> <td>11892</td> <td>0</td> <td>199.9</td> <td>0.47</td> <td>0.01</td> <td>0.16</td> <td>199.8</td>
+                         <td>100 Tps</td> <td>6001</td> <td>0</td> <td>100.0</td> <td>0.07</td> <td>0.01</td> <td>0.01</td> <td>100.0</td>
                     </tr>
                     <tr>
-                         <td>Read All Authority Members</td> <td>11978</td> <td>0</td> <td>201.4</td> <td>0.37</td> <td>0.01</td> <td>0.16</td> <td>201.4</td>
+                         <td>200 Tps</td> <td>9455</td> <td>0</td> <td>157.6</td> <td>0.22</td> <td>0.01</td> <td>0.04</td> <td>157.5</td>
                     </tr>
                     <tr>
-                         <td>Create university</td> <td>12921</td> <td>0</td> <td>217.3</td> <td>0.35</td> <td>0.01</td> <td>0.15</td> <td>217.2</td>
+                         <td>500 Tps</td> <td>9339</td> <td>0</td> <td>155.7</td> <td>0.27</td> <td>0.01</td> <td>0.05</td> <td>155.6</td>
                     </tr>
                     <tr>
-                         <td>Create certificate</td> <td>12575</td> <td>0</td> <td>211.3</td> <td>0.34</td> <td>0.01</td> <td>0.14</td> <td>211.2</td>
-                    </tr>
-                    <tr>
-                         <td>Share certificate</td> <td>12217</td> <td>0</td> <td>205.5</td> <td>0.26</td> <td>0.01</td> <td>0.14</td> <td>205.3</td>
-                    </tr>
-                    <tr>
-                         <td>Verify certificate</td> <td>13401</td> <td>0</td> <td>225.6</td> <td>0.23</td> <td>0.01</td> <td>0.14</td> <td>225.4</td>
+                         <td>1000 TPS</td> <td>9670</td> <td>0</td> <td>161.2</td> <td>0.21</td> <td>0.01</td> <td>0.04</td> <td>161.1</td>
                     </tr>
                 </table>
             </div>
-            <div style="border-bottom: 1px solid #d9d9d9; padding-bottom: 10px;" id="addAuthorityMember()">
-                <h2>Benchmark round: addAuthorityMember()</h2>
-                <p>Add Authority Members</p>
+            <div style="border-bottom: 1px solid #d9d9d9; padding-bottom: 10px;" id="100 Tps">
+                <h2>Benchmark round: 100 Tps</h2>
+                <p></p>
                 <pre style="overflow: visible;white-space: pre-wrap;max-height:100%;">txDuration: 60
 rateControl:
-  type: fixed-load
+  type: fixed-rate
   opts:
-    transactionLoad: 50
+    tps: 100
 </pre>
-                        <h3>Performance metrics for addAuthorityMember()</h3>
+                        <h3>Performance metrics for 100 Tps</h3>
                             <table style="min-width: 100%;">
                                 <tr>
                                      <th>Name</th> <th>Succ</th> <th>Fail</th> <th>Send Rate (TPS)</th> <th>Max Latency (s)</th> <th>Min Latency (s)</th> <th>Avg Latency (s)</th> <th>Throughput (TPS)</th>
                                 </tr>
                                 <tr>
-                                     <td>addAuthorityMember()</td> <td>11892</td> <td>0</td> <td>199.9</td> <td>0.47</td> <td>0.01</td> <td>0.16</td> <td>199.8</td>
+                                     <td>100 Tps</td> <td>6001</td> <td>0</td> <td>100.0</td> <td>0.07</td> <td>0.01</td> <td>0.01</td> <td>100.0</td>
                                 </tr>
                             </table>
-                        <h3>Resource utilization for addAuthorityMember()</h3>
+                        <h3>Resource utilization for 100 Tps</h3>
             </div>
 
-            <div style="border-bottom: 1px solid #d9d9d9; padding-bottom: 10px;" id="Read All Authority Members">
-                <h2>Benchmark round: Read All Authority Members</h2>
-                <p>Read asset benchmark</p>
+            <div style="border-bottom: 1px solid #d9d9d9; padding-bottom: 10px;" id="200 Tps">
+                <h2>Benchmark round: 200 Tps</h2>
+                <p></p>
                 <pre style="overflow: visible;white-space: pre-wrap;max-height:100%;">txDuration: 60
 rateControl:
-  type: fixed-load
+  type: fixed-rate
   opts:
-    transactionLoad: 50
+    tps: 200
 </pre>
-                        <h3>Performance metrics for Read All Authority Members</h3>
+                        <h3>Performance metrics for 200 Tps</h3>
                             <table style="min-width: 100%;">
                                 <tr>
                                      <th>Name</th> <th>Succ</th> <th>Fail</th> <th>Send Rate (TPS)</th> <th>Max Latency (s)</th> <th>Min Latency (s)</th> <th>Avg Latency (s)</th> <th>Throughput (TPS)</th>
                                 </tr>
                                 <tr>
-                                     <td>Read All Authority Members</td> <td>11978</td> <td>0</td> <td>201.4</td> <td>0.37</td> <td>0.01</td> <td>0.16</td> <td>201.4</td>
+                                     <td>200 Tps</td> <td>9455</td> <td>0</td> <td>157.6</td> <td>0.22</td> <td>0.01</td> <td>0.04</td> <td>157.5</td>
                                 </tr>
                             </table>
-                        <h3>Resource utilization for Read All Authority Members</h3>
+                        <h3>Resource utilization for 200 Tps</h3>
             </div>
 
-            <div style="border-bottom: 1px solid #d9d9d9; padding-bottom: 10px;" id="Create university">
-                <h2>Benchmark round: Create university</h2>
-                <p>add a new university</p>
+            <div style="border-bottom: 1px solid #d9d9d9; padding-bottom: 10px;" id="500 Tps">
+                <h2>Benchmark round: 500 Tps</h2>
+                <p></p>
                 <pre style="overflow: visible;white-space: pre-wrap;max-height:100%;">txDuration: 60
 rateControl:
-  type: fixed-load
+  type: fixed-rate
   opts:
-    transactionLoad: 50
+    tps: 500
 </pre>
-                        <h3>Performance metrics for Create university</h3>
+                        <h3>Performance metrics for 500 Tps</h3>
                             <table style="min-width: 100%;">
                                 <tr>
                                      <th>Name</th> <th>Succ</th> <th>Fail</th> <th>Send Rate (TPS)</th> <th>Max Latency (s)</th> <th>Min Latency (s)</th> <th>Avg Latency (s)</th> <th>Throughput (TPS)</th>
                                 </tr>
                                 <tr>
-                                     <td>Create university</td> <td>12921</td> <td>0</td> <td>217.3</td> <td>0.35</td> <td>0.01</td> <td>0.15</td> <td>217.2</td>
+                                     <td>500 Tps</td> <td>9339</td> <td>0</td> <td>155.7</td> <td>0.27</td> <td>0.01</td> <td>0.05</td> <td>155.6</td>
                                 </tr>
                             </table>
-                        <h3>Resource utilization for Create university</h3>
+                        <h3>Resource utilization for 500 Tps</h3>
             </div>
 
-            <div style="border-bottom: 1px solid #d9d9d9; padding-bottom: 10px;" id="Create certificate">
-                <h2>Benchmark round: Create certificate</h2>
-                <p>add a new Certificate</p>
+            <div style="border-bottom: 1px solid #d9d9d9; padding-bottom: 10px;" id="1000 TPS">
+                <h2>Benchmark round: 1000 TPS</h2>
+                <p></p>
                 <pre style="overflow: visible;white-space: pre-wrap;max-height:100%;">txDuration: 60
 rateControl:
-  type: fixed-load
+  type: fixed-rate
   opts:
-    transactionLoad: 50
+    tps: 1000
 </pre>
-                        <h3>Performance metrics for Create certificate</h3>
+                        <h3>Performance metrics for 1000 TPS</h3>
                             <table style="min-width: 100%;">
                                 <tr>
                                      <th>Name</th> <th>Succ</th> <th>Fail</th> <th>Send Rate (TPS)</th> <th>Max Latency (s)</th> <th>Min Latency (s)</th> <th>Avg Latency (s)</th> <th>Throughput (TPS)</th>
                                 </tr>
                                 <tr>
-                                     <td>Create certificate</td> <td>12575</td> <td>0</td> <td>211.3</td> <td>0.34</td> <td>0.01</td> <td>0.14</td> <td>211.2</td>
+                                     <td>1000 TPS</td> <td>9670</td> <td>0</td> <td>161.2</td> <td>0.21</td> <td>0.01</td> <td>0.04</td> <td>161.1</td>
                                 </tr>
                             </table>
-                        <h3>Resource utilization for Create certificate</h3>
-            </div>
-
-            <div style="border-bottom: 1px solid #d9d9d9; padding-bottom: 10px;" id="Share certificate">
-                <h2>Benchmark round: Share certificate</h2>
-                <p>share Certificate</p>
-                <pre style="overflow: visible;white-space: pre-wrap;max-height:100%;">txDuration: 60
-rateControl:
-  type: fixed-load
-  opts:
-    transactionLoad: 50
-</pre>
-                        <h3>Performance metrics for Share certificate</h3>
-                            <table style="min-width: 100%;">
-                                <tr>
-                                     <th>Name</th> <th>Succ</th> <th>Fail</th> <th>Send Rate (TPS)</th> <th>Max Latency (s)</th> <th>Min Latency (s)</th> <th>Avg Latency (s)</th> <th>Throughput (TPS)</th>
-                                </tr>
-                                <tr>
-                                     <td>Share certificate</td> <td>12217</td> <td>0</td> <td>205.5</td> <td>0.26</td> <td>0.01</td> <td>0.14</td> <td>205.3</td>
-                                </tr>
-                            </table>
-                        <h3>Resource utilization for Share certificate</h3>
-            </div>
-
-            <div style="border-bottom: 1px solid #d9d9d9; padding-bottom: 10px;" id="Verify certificate">
-                <h2>Benchmark round: Verify certificate</h2>
-                <p>verify Certificate</p>
-                <pre style="overflow: visible;white-space: pre-wrap;max-height:100%;">txDuration: 60
-rateControl:
-  type: fixed-load
-  opts:
-    transactionLoad: 50
-</pre>
-                        <h3>Performance metrics for Verify certificate</h3>
-                            <table style="min-width: 100%;">
-                                <tr>
-                                     <th>Name</th> <th>Succ</th> <th>Fail</th> <th>Send Rate (TPS)</th> <th>Max Latency (s)</th> <th>Min Latency (s)</th> <th>Avg Latency (s)</th> <th>Throughput (TPS)</th>
-                                </tr>
-                                <tr>
-                                     <td>Verify certificate</td> <td>13401</td> <td>0</td> <td>225.6</td> <td>0.23</td> <td>0.01</td> <td>0.14</td> <td>225.4</td>
-                                </tr>
-                            </table>
-                        <h3>Resource utilization for Verify certificate</h3>
+                        <h3>Resource utilization for 1000 TPS</h3>
             </div>
 
             <div style="border-bottom: 1px solid #d9d9d9; padding-bottom: 10px;">
@@ -308,79 +258,51 @@ rateControl:
                 <pre id="benchmarkInfo" style="overflow: visible;white-space: pre-wrap;max-height:100%;">name: basic-contract-benchmark
 description: test benchmark
 workers:
-  number: 3
+  number: 1
 rounds:
-  - label: addAuthorityMember()
-    description: Add Authority Members
+  - label: 100 Tps
     txDuration: 60
     rateControl:
-      type: fixed-load
+      type: fixed-rate
       opts:
-        transactionLoad: 50
-    workload:
-      module: workload&#x2F;addAuthority.js
-      arguments:
-        assets: 10
-        contractId: basic
-  - label: Read All Authority Members
-    description: Read asset benchmark
-    txDuration: 60
-    rateControl:
-      type: fixed-load
-      opts:
-        transactionLoad: 50
-    workload:
-      module: workload&#x2F;authority.js
-      arguments:
-        assets: 10
-        contractId: basic
-  - label: Create university
-    description: add a new university
-    txDuration: 60
-    rateControl:
-      type: fixed-load
-      opts:
-        transactionLoad: 50
-    workload:
-      module: workload&#x2F;createUniversity.js
-      arguments:
-        assets: 10
-        contractId: basic
-  - label: Create certificate
-    description: add a new Certificate
-    txDuration: 60
-    rateControl:
-      type: fixed-load
-      opts:
-        transactionLoad: 50
-    workload:
-      module: workload&#x2F;createCertificate.js
-      arguments:
-        assets: 10
-        contractId: basic
-  - label: Share certificate
-    description: share Certificate
-    txDuration: 60
-    rateControl:
-      type: fixed-load
-      opts:
-        transactionLoad: 50
-    workload:
-      module: workload&#x2F;shareCertificate.js
-      arguments:
-        assets: 10
-        contractId: basic
-  - label: Verify certificate
-    description: verify Certificate
-    txDuration: 60
-    rateControl:
-      type: fixed-load
-      opts:
-        transactionLoad: 50
+        tps: 100
     workload:
       module: workload&#x2F;verifyCertificate.js
       arguments:
-        assets: 10
+        assets: 2
+        contractId: basic
+  - label: 200 Tps
+    txDuration: 60
+    rateControl:
+      type: fixed-rate
+      opts:
+        tps: 200
+    workload:
+      module: workload&#x2F;verifyCertificate.js
+      arguments:
+        assets: 2
+        contractId: basic
+  - label: 500 Tps
+    txDuration: 60
+    rateControl:
+      type: fixed-rate
+      opts:
+        tps: 500
+    workload:
+      module: workload&#x2F;verifyCertificate.js
+      arguments:
+        assets: 2
+        contractId: basic
+  - label: 1000 TPS
+    txDuration: 60
+    rateControl:
+      type: fixed-rate
+      opts:
+        tps: 1000
+    workload:
+      module: workload&#x2F;verifyCertificate.js
+      arguments:
+        assets: 2
         contractId: basic
 </pre>
                 <h3>SUT</h3>
